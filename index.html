@@ -3,368 +3,678 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رحلة استكشاف اسم الآلة - إعداد المعلمة شذى الحازمي</title>
-    <script src="https://cdn.taCDN.TAilwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <title>محاكي مهارات أوفيس المتقدمة - الصف الثالث متوسط</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #FDFBF7;
-        }
-        .step-content {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        .step-content.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 400px;
-        }
-        .tool-highlight {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .tool-highlight:hover {
-            background-color: #D97757;
-            color: white;
-            padding: 0 4px;
-            border-radius: 4px;
-        }
-        .emoji-icon {
-            font-size: 3.5rem;
-            display: inline-block;
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
-        .emoji-icon:hover {
-            transform: scale(1.2);
-        }
-        /* بطاقات المفهوم المطورة */
-        .concept-card .verb-side {
-            display: block;
-        }
-        .concept-card .noun-side {
-            display: none;
-        }
-        .concept-card.is-flipped .verb-side {
-            display: none;
-        }
-        .concept-card.is-flipped .noun-side {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body { font-family: 'Tajawal', sans-serif; background-color: #f1f5f9; color: #1e293b; overflow-x: hidden; }
+        
+        .ribbon-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; padding: 6px; border-radius: 4px; transition: 0.2s; min-width: 65px; height: 100%; }
+        .ribbon-btn:hover:not(:disabled) { background: #e2e6ea; color: #2b579a; }
+        .ribbon-group { display: flex; align-items: center; gap: 4px; border-left: 1px solid #ddd; padding: 0 10px; height: 100%; }
+
+        .excel-grid { display: grid; grid-template-columns: 45px repeat(6, 1fr); background: #bbb; gap: 1px; border: 1px solid #999; }
+        .excel-cell { background: white; min-height: 32px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; outline: none; border: 1px solid transparent; }
+        .excel-cell.selected-row { background: #e7f1ff; }
+        .excel-header { background: #f3f3f3; font-weight: bold; justify-content: center; color: #444; cursor: pointer; transition: background 0.2s; }
+        .excel-header:hover { background: #e2e2e2; }
+        .frozen-row { position: sticky; top: 0; z-index: 50; background: #eee !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        .word-page { background: white; min-height: 1000px; width: 100%; max-width: 800px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 70px; outline: none; }
+        .toc-box { border: 1px solid #e2e8f0; padding: 25px; background: #f8fafc; margin-bottom: 30px; border-radius: 8px; }
+
+        .ppt-slide { aspect-ratio: 16/9; background: white; border: 1px solid #cbd5e1; position: relative; overflow: hidden; transition: 0.5s; }
+        .master-active { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; color: white !important; border: 3px solid #f97316 !important; }
+
+        .sidebar-step { border-right: 4px solid #e2e8f0; transition: 0.3s; }
+        .sidebar-step.active { border-right-color: #2563eb; background: #eff6ff; }
+        .sidebar-step.completed { border-right-color: #22c55e; background: #f0fdf4; opacity: 0.8; }
+        
+        .active-tab-indicator { border-top: 4px solid #2b579a; color: #2b579a; font-weight: bold; background: white; }
     </style>
 </head>
-<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col">
 
-<!-- Chosen Palette: Warm Neutrals with Terracotta Accent -->
-<!-- Application Structure Plan: Interactive journey mapping the 5 pedagogical stages. 
-     Updates: 
-     1. Box Interaction: Emoji click triggers the summary phrase. 
-     2. Concept Cards: Click-to-swap mechanism (verb vanishes, noun appears). 
-     3. Content: Replaced Refrigerator with Pen.
-     4. Footer: Updated teacher credit. -->
-<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
-    <header class="bg-white shadow-sm border-b-4 border-[#D97757] sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold text-[#4A8586]">لغتي الخالدة | <span class="text-[#D97757]">اسم الآلة</span></h1>
-            <div class="text-sm font-medium bg-[#FDFBF7] px-3 py-1 rounded-full text-gray-600 border border-gray-200">
-                إعداد المعلمة: شذى الحازمي
+    <!-- Navbar -->
+    <nav class="bg-[#2b579a] text-white p-3 flex justify-between items-center shadow-lg sticky top-0 z-[100]">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-desktop text-2xl"></i>
+            <div>
+                <h1 class="font-bold text-sm md:text-base">محاكي مهارات أوفيس (أ / ب)</h1>
+                <p class="text-[10px] opacity-80">الصف الثالث متوسط - مهارات متقدمة</p>
             </div>
         </div>
-    </header>
+        <div class="flex items-center gap-4">
+            <div id="user-info" class="hidden text-xs font-bold border-l pl-4 border-white/20">
+                الطالبة: <span id="user-name-tag"></span>
+            </div>
+            <button onclick="openTeacherAuth()" class="bg-white/10 hover:bg-white/20 px-4 py-1 rounded text-xs transition">دخول المعلمة</button>
+        </div>
+    </nav>
 
-    <main class="flex-grow max-w-5xl mx-auto w-full px-4 py-8 flex flex-col md:flex-row gap-8">
+    <main class="flex-1 container mx-auto p-4">
         
-        <aside class="md:w-1/4 flex-shrink-0">
-            <div class="bg-white p-4 rounded-xl shadow-md border border-gray-100 sticky top-24">
-                <h2 class="font-bold text-lg mb-4 text-gray-700 border-b pb-2 border-gray-100">مسار الدرس</h2>
-                <nav id="stepNav" class="flex flex-col gap-2">
-                    <button onclick="goToStep(1)" class="nav-btn w-full text-right px-4 py-3 rounded-lg font-medium transition-colors bg-[#D97757] text-white shadow-sm" data-step="1">1. صندوق المفاجآت</button>
-                    <button onclick="goToStep(2)" class="nav-btn w-full text-right px-4 py-3 rounded-lg font-medium transition-colors bg-gray-50 text-gray-600 hover:bg-gray-100" data-step="2">2. قصة النجار</button>
-                    <button onclick="goToStep(3)" class="nav-btn w-full text-right px-4 py-3 rounded-lg font-medium transition-colors bg-gray-50 text-gray-600 hover:bg-gray-100" data-step="3">3. المفهوم والتعريف</button>
-                    <button onclick="goToStep(4)" class="nav-btn w-full text-right px-4 py-3 rounded-lg font-medium transition-colors bg-gray-50 text-gray-600 hover:bg-gray-100" data-step="4">4. أدوات حولنا</button>
-                    <button onclick="goToStep(5)" class="nav-btn w-full text-right px-4 py-3 rounded-lg font-medium transition-colors bg-gray-50 text-gray-600 hover:bg-gray-100" data-step="5">5. أوزان الآلات</button>
-                </nav>
+        <!-- Login View -->
+        <div id="view-login" class="max-w-md mx-auto mt-16 bg-white p-8 rounded-3xl shadow-2xl border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h2 class="text-2xl font-bold">تسجيل دخول الطالبة</h2>
+                <p class="text-slate-500 mt-2">أهلاً بكِ في معمل الحاسب الآلي</p>
             </div>
-        </aside>
-
-        <section class="md:w-3/4 bg-white p-6 md:p-10 rounded-2xl shadow-lg border border-gray-50 relative overflow-hidden">
-            
-            <!-- Step 1: Surprise Box -->
-            <div id="step-1" class="step-content active">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-[#4A8586] mb-3">صندوق المفاجآت</h2>
-                    <p class="text-gray-600 leading-relaxed text-lg">
-                        انقر على الصندوق لاكتشاف ما بداخله، ثم انقر على أي أداة تظهر لك لمعرفة الرابط العجيب بينها!
-                    </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1 mr-1">الصف الدراسي:</label>
+                    <select id="login-class" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500">
+                        <option value="أ">ثالث متوسط (أ)</option>
+                        <option value="ب">ثالث متوسط (ب)</option>
+                    </select>
                 </div>
-
-                <div class="bg-[#FDFBF7] rounded-xl p-8 text-center border-2 border-dashed border-[#E2A859]">
-                    <p class="text-xl font-medium mb-6">"هل يمكننا بناء منزل بأيدينا المجردة فقط؟"</p>
-                    
-                    <button id="boxBtn" class="text-7xl hover:scale-110 transition-transform duration-300 drop-shadow-md focus:outline-none mb-4">
-                        📦
-                    </button>
-                    <p id="boxHint" class="text-sm text-gray-500">انقر لفتح الصندوق</p>
-
-                    <div id="iconsContainer" class="hidden mt-8 transition-all">
-                        <h3 class="text-lg font-bold text-[#4A8586] mb-6">ما هي هذه الأشياء؟ (انقر على أحدها)</h3>
-                        <div class="flex flex-wrap justify-center gap-8 text-5xl mb-8">
-                            <span class="emoji-icon tool-trigger" onclick="showFinalPhrase()">🔨</span>
-                            <span class="emoji-icon tool-trigger" onclick="showFinalPhrase()">🪚</span>
-                            <span class="emoji-icon tool-trigger" onclick="showFinalPhrase()">🪛</span>
-                            <span class="emoji-icon tool-trigger" onclick="showFinalPhrase()">🔑</span>
-                            <span class="emoji-icon tool-trigger" onclick="showFinalPhrase()">🖊️</span>
-                        </div>
-                        
-                        <div id="finalPhrase" class="hidden opacity-0 transition-opacity duration-700">
-                            <p class="text-gray-700 font-bold bg-white inline-block px-8 py-4 rounded-full shadow-lg border-2 border-[#D97757] text-2xl animate-bounce">
-                                جميعها <strong class="text-[#D97757]">أدوات</strong> نستخدمها لإنجاز العمل!
-                            </p>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1 mr-1">الاسم الثلاثي:</label>
+                    <input type="text" id="login-name" placeholder="اكتبي اسمكِ هنا..." class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500">
                 </div>
+                <button onclick="startTraining()" id="start-btn" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-[#1a3a6b] transition transform hover:scale-[1.01]">
+                    ابدئي المحاكاة الآن <i class="fas fa-arrow-left mr-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Hub -->
+        <div id="view-main" class="hidden animate-in fade-in duration-500">
+            <div class="flex flex-col lg:flex-row gap-6">
                 
-                <div class="mt-8 flex justify-end">
-                    <button onclick="goToStep(2)" class="bg-[#4A8586] hover:bg-[#396a6b] text-white px-6 py-2 rounded-lg font-bold transition-colors">التالي: قصة النجار ←</button>
+                <!-- Sidebar Progress -->
+                <div class="lg:w-80 space-y-4 shrink-0">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-500"></i> قائمة المهارات
+                        </h3>
+                        <div id="skills-list" class="space-y-2">
+                            <!-- Dynamic skills go here -->
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl">
+                        <div class="text-[10px] opacity-60 mb-1 font-bold">إجمالي الإتقان</div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span id="mastery-perc" class="text-2xl font-bold">0%</span>
+                            <span class="text-[10px] bg-blue-600 px-2 py-0.5 rounded" id="mastery-label">مبتدئة</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="mastery-bar" class="bg-blue-500 h-full transition-all duration-700" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor Container -->
+                <div class="flex-1 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col min-h-[750px]">
+                    
+                    <!-- Ribbon Tabs -->
+                    <div class="bg-slate-100 flex text-[11px] font-bold border-b">
+                        <button onclick="switchApp('word')" id="tab-word" class="p-3 px-8 transition active-tab-indicator">Word</button>
+                        <button onclick="switchApp('excel')" id="tab-excel" class="p-3 px-8 transition opacity-50">Excel</button>
+                        <button onclick="switchApp('ppt')" id="tab-ppt" class="p-3 px-8 transition opacity-50">PowerPoint</button>
+                    </div>
+
+                    <!-- App Ribbon -->
+                    <div id="ribbon" class="h-24 bg-[#fbfbfb] border-b p-2 flex items-start overflow-x-auto gap-2 no-scrollbar">
+                        <!-- Ribbon items injected here -->
+                    </div>
+
+                    <!-- Simulator Viewport -->
+                    <div id="viewport" class="flex-1 bg-slate-200 p-4 md:p-8 overflow-auto">
+                        
+                        <!-- Word Page -->
+                        <div id="view-word" class="hidden">
+                            <div id="word-doc" class="word-page" contenteditable="true">
+                                <div id="toc-area" class="toc-box hidden">
+                                    <h3 class="font-bold border-b-2 border-slate-200 mb-3 text-lg">فهرس المحتويات</h3>
+                                    <div id="toc-placeholder" class="text-sm italic text-slate-400">سيتم توليد الجدول تلقائياً...</div>
+                                </div>
+                                <h1 class="text-3xl font-bold mb-8 text-blue-900 border-b-2 border-blue-100 pb-2">رؤية المملكة 2030</h1>
+                                <p class="mb-6 leading-relaxed">تعتبر رؤية المملكة 2030 خطة طموحة تهدف إلى تحويل المملكة العربية السعودية إلى قوة استثمارية عالمية ومركز يربط بين القارات الثلاث.</p>
+                                <h2 class="text-xl font-bold mb-4">أهداف المجتمع الحيوي</h2>
+                                <p class="mb-4">تعتمد الرؤية على ثلاثة محاور أساسية:</p>
+                                <div id="w-list-target" class="mr-8 mb-8">
+                                    <!-- List goes here -->
+                                </div>
+                                <div id="w-import-target" class="hidden mt-10 p-5 bg-purple-50 border-r-8 border-purple-500 rounded-lg">
+                                    <h3 class="font-bold text-purple-900 mb-2">محتوى مستورد من ملف (نيوم.docx):</h3>
+                                    <p class="text-sm italic">مشروع نيوم هو رؤية لمستقبل جديد، حيث تُبنى مدينة "ذا لاين" لتكون نموذجاً عالمياً للحياة الحضرية الذكية والمتجددة.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Excel Page -->
+                        <div id="view-excel" class="hidden">
+                            <div class="bg-white p-6 rounded-2xl shadow-xl inline-block min-w-full">
+                                <div class="mb-3 flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                    <span>تلميح: انقري على أرقام الصفوف لاختيار عدة صفوف معاً</span>
+                                    <span id="xl-sel-count">محدد: 0 صفوف</span>
+                                </div>
+                                <div id="xl-grid" class="excel-grid"></div>
+                            </div>
+                        </div>
+
+                        <!-- PPT Page -->
+                        <div id="view-ppt" class="hidden">
+                            <div class="flex gap-6 h-full">
+                                <div class="w-48 flex flex-col gap-3 pr-2 border-l overflow-y-auto no-scrollbar">
+                                    <div class="ppt-slide p-2 text-[5px] border-4 border-blue-500 shadow-xl cursor-pointer">
+                                        <div class="font-bold border-b mb-1">مشروع نيوم - ذا لاين</div>
+                                        <p>مستقبل الحياة المتجددة في المملكة</p>
+                                    </div>
+                                    <div class="ppt-slide p-2 text-[5px] opacity-40">الشريحة 2</div>
+                                    <div class="ppt-slide p-2 text-[5px] opacity-40">الشريحة 3</div>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center justify-center">
+                                    <div id="ppt-slide-main" class="ppt-slide w-full max-w-2xl p-16 flex flex-col items-center justify-center text-center shadow-2xl">
+                                        <h1 class="text-4xl font-bold mb-6">ذا لاين THE LINE</h1>
+                                        <p class="text-xl text-slate-500">ثورة في الحياة الحضرية</p>
+                                        <div class="absolute bottom-6 right-6 text-[10px] opacity-40">الصف الثالث متوسط - مهارات تقنية</div>
+                                    </div>
+                                    <div id="ppt-master-tag" class="mt-4 bg-orange-600 text-white px-6 py-1.5 rounded-full text-xs font-bold hidden shadow-lg animate-pulse">
+                                        <i class="fas fa-eye ml-2"></i> وضع الشكل الرئيسي (Slide Master) نَشِط
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Step 2: Carpenter Story -->
-            <div id="step-2" class="step-content">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-[#4A8586] mb-3">قصة النجار</h2>
-                    <p class="text-gray-600 leading-relaxed text-lg">تفاعل مع الكلمات الملونة لاكتشاف الفعل الذي اشتق منه اسم الآلة.</p>
-                </div>
-                <div class="flex flex-col lg:flex-row gap-8 items-center">
-                    <div class="lg:w-2/3 bg-gray-50 p-6 rounded-xl border border-gray-200 text-xl leading-loose">
-                        "بالأمس، تعطل باب منزلي، فاستدعيتُ نجاراً ماهراً. رأيته يُخرج من حقيبته 
-                        <span class="tool-highlight font-bold text-[#D97757]" data-verb="فَكَّ">مفكاً</span>، ثم استخدم 
-                        <span class="tool-highlight font-bold text-[#D97757]" data-verb="نَشَرَ">منشاراً</span>، وبعدها استعمل 
-                        <span class="tool-highlight font-bold text-[#D97757]" data-verb="بَرَدَ">مبردًا</span> لتنعيم الحواف. وفي النهاية، استخدم 
-                        <span class="tool-highlight font-bold text-[#D97757]" data-verb="فَتَحَ">المفتاح</span>."
-                    </div>
-                    <div class="lg:w-1/3 w-full">
-                        <div id="verbDisplay" class="bg-[#4A8586] text-white p-6 rounded-xl shadow-md text-center h-full flex flex-col justify-center min-h-[150px] transition-all">
-                            <p class="font-medium text-lg">مرر الماوس على الأدوات في القصة</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-8 flex justify-between">
-                    <button onclick="goToStep(1)" class="text-gray-500 px-4 py-2 font-medium">→ السابق</button>
-                    <button onclick="goToStep(3)" class="bg-[#4A8586] text-white px-6 py-2 rounded-lg font-bold">التالي ←</button>
-                </div>
+        <!-- Teacher View -->
+        <div id="view-teacher" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">سجل متابعة إنجازات الطالبات</h2>
+                <button onclick="location.reload()" class="bg-slate-200 px-6 py-2 rounded-xl text-sm font-bold">خروج</button>
             </div>
-
-            <!-- Step 3: Definition & Swapping Cards -->
-            <div id="step-3" class="step-content">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-[#4A8586] mb-3">المفهوم والتعريف</h2>
-                    <p class="text-gray-600 leading-relaxed text-lg">
-                        انقر على الفعل أدناه ليختفي ويظهر مكانه اسم الآلة المناسب له.
-                    </p>
-                </div>
-
-                <div class="bg-gradient-to-r from-[#4A8586] to-[#396a6b] text-white p-6 rounded-xl shadow-md mb-8">
-                    <p class="text-lg leading-relaxed">
-                        <strong class="text-[#E2A859] text-xl">اسم الآلة:</strong> اسم مشتق من الفعل ليدلنا على الأداة التي وقع بها الفعل.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Card 1 -->
-                    <div class="concept-card border-2 border-[#4A8586] rounded-xl p-8 text-center bg-white cursor-pointer shadow-sm hover:shadow-md transition-all" onclick="toggleConceptCard(this)">
-                        <div class="verb-side">
-                            <p class="text-gray-400 text-xs mb-2">انقر على الفعل</p>
-                            <p class="text-3xl font-bold text-[#D97757]">كَنَسَ</p>
-                        </div>
-                        <div class="noun-side">
-                            <p class="text-gray-400 text-xs mb-2">اسم الآلة هو:</p>
-                            <p class="text-4xl font-black text-[#4A8586]">مِكْنَسَة</p>
-                        </div>
-                    </div>
-                    <!-- Card 2 -->
-                    <div class="concept-card border-2 border-[#4A8586] rounded-xl p-8 text-center bg-white cursor-pointer shadow-sm hover:shadow-md transition-all" onclick="toggleConceptCard(this)">
-                        <div class="verb-side">
-                            <p class="text-gray-400 text-xs mb-2">انقر على الفعل</p>
-                            <p class="text-3xl font-bold text-[#D97757]">حَرَثَ</p>
-                        </div>
-                        <div class="noun-side">
-                            <p class="text-gray-400 text-xs mb-2">اسم الآلة هو:</p>
-                            <p class="text-4xl font-black text-[#4A8586]">مِحْرَاث</p>
-                        </div>
-                    </div>
-                    <!-- Card 3 (Updated: Pen) -->
-                    <div class="concept-card border-2 border-[#4A8586] rounded-xl p-8 text-center bg-white cursor-pointer shadow-sm hover:shadow-md transition-all" onclick="toggleConceptCard(this)">
-                        <div class="verb-side">
-                            <p class="text-gray-400 text-xs mb-2">انقر على الفعل</p>
-                            <p class="text-3xl font-bold text-[#D97757]">كَتَبَ</p>
-                        </div>
-                        <div class="noun-side">
-                            <p class="text-gray-400 text-xs mb-2">اسم الآلة هو:</p>
-                            <p class="text-4xl font-black text-[#4A8586]">قَلَم</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-8 flex justify-between">
-                    <button onclick="goToStep(2)" class="text-gray-500 px-4 py-2 font-medium">→ السابق</button>
-                    <button onclick="goToStep(4)" class="bg-[#4A8586] text-white px-6 py-2 rounded-lg font-bold">التالي ←</button>
-                </div>
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-slate-50 border-b">
+                        <tr>
+                            <th class="p-5">اسم الطالبة</th>
+                            <th class="p-5 text-center">الصف</th>
+                            <th class="p-5 text-center">الإنجاز</th>
+                            <th class="p-5 text-center">وورد</th>
+                            <th class="p-5 text-center">إكسل</th>
+                            <th class="p-5 text-center">PPT</th>
+                            <th class="p-5">التوقيت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-table"></tbody>
+                </table>
+                <div id="no-data" class="p-20 text-center text-slate-400 font-bold">لا يوجد بيانات حالياً</div>
             </div>
+        </div>
 
-            <!-- Step 4: Tools Chart -->
-            <div id="step-4" class="step-content">
-                <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-[#4A8586] mb-3">أدوات حولنا</h2>
-                    <p class="text-gray-600 leading-relaxed text-lg">تصنيف الآلات حسب بيئة استخدامها.</p>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                    <div class="bg-[#FDFBF7] p-6 rounded-xl border border-gray-200">
-                        <ul class="space-y-4">
-                            <li class="flex items-center gap-3">🖊️ <span><strong>قلم:</strong> آلة للكتابة</span></li>
-                            <li class="flex items-center gap-3">📏 <span><strong>مسطرة:</strong> آلة للتسطير</span></li>
-                            <li class="flex items-center gap-3">🧺 <span><strong>غسالة:</strong> آلة للغسيل</span></li>
-                        </ul>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border">
-                        <div class="chart-container">
-                            <canvas id="toolsChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-8 flex justify-between">
-                    <button onclick="goToStep(3)" class="text-gray-500 px-4 py-2 font-medium">→ السابق</button>
-                    <button onclick="goToStep(5)" class="bg-[#4A8586] text-white px-6 py-2 rounded-lg font-bold">التالي ←</button>
-                </div>
-            </div>
-
-            <!-- Step 5: Foundation -->
-            <div id="step-5" class="step-content">
-                <div class="mb-8 text-center">
-                    <h2 class="text-3xl font-bold text-[#4A8586] mb-3">تهيئة الأساس للدرس</h2>
-                    <p class="text-gray-600 text-lg">سنتعرف الآن على الأوزان القياسية لاسم الآلة.</p>
-                </div>
-                <div class="bg-[#FDFBF7] p-10 rounded-2xl text-center border border-gray-200">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border">
-                            <p class="text-gray-500 text-sm">أوزان قديمة</p>
-                            <p class="text-2xl font-bold text-[#4A8586]">مِفْعَال ، مِفْعَل</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border">
-                            <p class="text-gray-500 text-sm">أوزان حديثة</p>
-                            <p class="text-2xl font-bold text-[#D97757]">فَاعُول ، فَعَّالَة</p>
-                        </div>
-                    </div>
-                    <h3 class="text-2xl font-black text-[#4A8586] border-b-4 border-[#E2A859] pb-2 inline-block">فلنبدأ الدرس يا أبطال!</h3>
-                </div>
-                <div class="mt-8 flex justify-center">
-                    <button onclick="goToStep(1)" class="bg-gray-800 text-white px-8 py-3 rounded-lg font-bold">إعادة الرحلة ↺</button>
-                </div>
-            </div>
-
-        </section>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-5xl mx-auto px-4 py-8 text-center">
-            <p class="text-gray-500 text-sm mb-4">تم إعداد هذا التطبيق التفاعلي لمساندة درس "اسم الآلة".</p>
-            <div class="pt-4 border-t border-gray-100">
-                 <p class="text-xl font-bold text-[#4A8586]">إعداد المعلمة: شذى الحازمي</p>
+    <!-- Modals -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[200] hidden items-center justify-center p-4 backdrop-blur-sm">
+        
+        <!-- Validation Modal -->
+        <div id="dlg-val" class="bg-white rounded-3xl p-8 w-full max-w-sm hidden shadow-2xl">
+            <h3 class="font-bold text-lg mb-4 border-b pb-2 text-green-700">التحقق من صحة البيانات</h3>
+            <div class="space-y-4">
+                <select id="xl-val-type" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-green-500" onchange="document.getElementById('xl-val-src-box').classList.toggle('hidden', this.value!='list')">
+                    <option value="any">أي قيمة</option>
+                    <option value="list">قائمة</option>
+                </select>
+                <div id="xl-val-src-box" class="hidden">
+                    <input type="text" id="xl-val-src" placeholder="ممتاز,جيد,مقبول" class="w-full p-3 border rounded-xl text-sm">
+                </div>
+                <div class="flex justify-end gap-2 pt-4">
+                    <button onclick="closeModals()" class="px-4 py-2 text-slate-400">إلغاء</button>
+                    <button onclick="applyXlValidation()" class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold">تطبيق</button>
+                </div>
             </div>
         </div>
-    </footer>
 
-    <script>
-        // --- Navigation ---
-        function goToStep(stepNumber) {
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                const isActive = btn.dataset.step == stepNumber;
-                btn.classList.toggle('bg-[#D97757]', isActive);
-                btn.classList.toggle('text-white', isActive);
-                btn.classList.toggle('shadow-sm', isActive);
-                btn.classList.toggle('bg-gray-50', !isActive);
-                btn.classList.toggle('text-gray-600', !isActive);
-            });
-            document.querySelectorAll('.step-content').forEach(section => section.classList.remove('active'));
-            document.getElementById(`step-${stepNumber}`).classList.add('active');
-            if(stepNumber === 4 && !window.chartRendered) { renderChart(); window.chartRendered = true; }
-        }
+        <!-- Translation Modal -->
+        <div id="dlg-trans" class="bg-white rounded-3xl p-8 w-full max-w-md hidden shadow-2xl">
+            <h3 class="font-bold text-lg mb-4 border-b pb-2 text-blue-700">أدوات الترجمة</h3>
+            <div class="space-y-5">
+                <div id="trans-preview" class="p-4 bg-blue-50 border rounded-xl text-xs italic text-blue-800"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="doTranslate('sel')" class="bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg">ترجمة المحدد</button>
+                    <button onclick="doTranslate('all')" class="bg-slate-800 text-white py-4 rounded-2xl font-bold shadow-lg">ترجمة المستند</button>
+                </div>
+            </div>
+        </div>
 
-        // --- Step 1: Logic (Updated) ---
-        const boxBtn = document.getElementById('boxBtn');
-        const iconsContainer = document.getElementById('iconsContainer');
-        const finalPhrase = document.getElementById('finalPhrase');
-        const boxHint = document.getElementById('boxHint');
+        <!-- Teacher Login -->
+        <div id="dlg-teacher" class="bg-white rounded-3xl p-10 w-full max-w-sm hidden text-center shadow-2xl">
+            <h3 class="font-bold text-xl mb-6">دخول المعلمة</h3>
+            <input type="password" id="teacher-pass" placeholder="كلمة المرور..." class="w-full p-4 border rounded-2xl text-center outline-none focus:ring-2 ring-blue-500 mb-6">
+            <button onclick="handleTeacherLogin()" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold text-lg shadow-xl">دخول</button>
+            <p id="teacher-err" class="text-red-500 text-xs mt-3 hidden">كلمة المرور خاطئة!</p>
+        </div>
 
-        boxBtn.addEventListener('click', () => {
-            boxBtn.innerText = '🔓';
-            boxHint.classList.add('hidden');
-            iconsContainer.classList.remove('hidden');
-        });
+    </div>
 
-        function showFinalPhrase() {
-            finalPhrase.classList.remove('hidden');
-            setTimeout(() => {
-                finalPhrase.classList.remove('opacity-0');
-                finalPhrase.classList.add('opacity-100');
-            }, 10);
-        }
+    <!-- Toast -->
+    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-3 rounded-full shadow-2xl transition-all duration-500 opacity-0 -translate-y-10 z-[300]">
+        <span id="toast-msg"></span>
+    </div>
 
-        // --- Step 2: Hover Logic ---
-        const highlights = document.querySelectorAll('.tool-highlight');
-        const verbDisplay = document.getElementById('verbDisplay');
-        highlights.forEach(item => {
-            item.addEventListener('mouseenter', (e) => {
-                const verb = e.target.getAttribute('data-verb');
-                verbDisplay.innerHTML = `<p class="text-sm opacity-80">الفعل المشتق:</p><p class="text-5xl font-black text-[#FDFBF7]">${verb}</p>`;
-                verbDisplay.style.backgroundColor = '#D97757';
-            });
-            item.addEventListener('mouseleave', () => {
-                verbDisplay.innerHTML = `<p class="font-medium text-lg">مرر الماوس على الأدوات في القصة</p>`;
-                verbDisplay.style.backgroundColor = '#4A8586';
-            });
-        });
+    <!-- System Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // --- Step 3: Card Toggle (Fixed logic) ---
-        function toggleConceptCard(card) {
-            card.classList.toggle('is-flipped');
-        }
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'advanced-sim-v4';
 
-        // --- Step 4: Chart ---
-        function renderChart() {
-            const ctx = document.getElementById('toolsChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['منزلية', 'مهنية', 'مدرسية'],
-                    datasets: [{
-                        data: [45, 30, 25],
-                        backgroundColor: ['#4A8586', '#D97757', '#E2A859'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', rtl: true, labels: { font: { family: "'Tajawal', sans-serif" } } } }
+        let user = null;
+        let isAuthReady = false;
+        let currentApp = 'word';
+        let studentData = {
+            name: "", class: "",
+            skills: {
+                w_style: false, w_toc: false, w_list: false, w_import: false, w_translate: false,
+                e_val: false, e_freeze: false, e_link: false, e_protect: false,
+                p_master: false, p_export: false
+            }
+        };
+
+        const totalSkills = 11;
+
+        // --- Core Init ---
+        async function init() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
                 }
+            } catch (e) { console.error("Auth Fail", e); }
+        }
+
+        onAuthStateChanged(auth, u => {
+            user = u;
+            isAuthReady = true;
+        });
+
+        // --- Auth & Entry ---
+        window.startTraining = async () => {
+            const name = document.getElementById('login-name').value.trim();
+            const cls = document.getElementById('login-class').value;
+            if (name.length < 8) return showToast("يرجى إدخال اسمكِ الثلاثي.");
+            if (!isAuthReady) return showToast("جاري تهيئة النظام...");
+
+            studentData.name = name;
+            studentData.class = cls;
+            
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-main').classList.remove('hidden');
+            document.getElementById('user-info').classList.remove('hidden');
+            document.getElementById('user-name-tag').innerText = name;
+            
+            initExcelGrid();
+            window.switchApp('word');
+            await saveProgress();
+        };
+
+        async function saveProgress() {
+            if (!user) return;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', user.uid), {
+                ...studentData,
+                timestamp: serverTimestamp()
+            }, { merge: true });
+            updateProgressUI();
+        }
+
+        function updateProgressUI() {
+            const done = Object.values(studentData.skills).filter(v => v).length;
+            const perc = Math.round((done / totalSkills) * 100);
+            document.getElementById('mastery-perc').innerText = perc + "%";
+            document.getElementById('mastery-bar').style.width = perc + "%";
+            document.getElementById('mastery-label').innerText = perc >= 100 ? "متقنة" : (perc > 50 ? "متقدمة" : "متدربة");
+            
+            loadSkillsSidebar(currentApp);
+        }
+
+        // --- Navigation ---
+        window.switchApp = (app) => {
+            currentApp = app;
+            document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
+            document.getElementById(`view-${app}`).classList.remove('hidden');
+            
+            document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('opacity-50'));
+            document.getElementById(`tab-${app}`).classList.remove('opacity-50');
+            document.getElementById(`tab-${app}`).classList.add('active-tab-indicator', 'opacity-100');
+
+            renderRibbon(app);
+            loadSkillsSidebar(app);
+        };
+
+        const ribbons = {
+            word: `
+                <div class="ribbon-group">
+                    <button onclick="doWStyle()" class="ribbon-btn"><i class="fas fa-heading"></i><span>العنوان 1</span></button>
+                    <button onclick="doWList()" class="ribbon-btn"><i class="fas fa-list-ol"></i><span>قائمة أهداف</span></button>
+                    <span class="text-[8px] text-gray-400 mt-auto">الرئيسية</span>
+                </div>
+                <div class="ribbon-group">
+                    <button onclick="doWImport()" class="ribbon-btn"><i class="fas fa-file-import text-purple-600"></i><span>استيراد</span></button>
+                    <span class="text-[8px] text-gray-400 mt-auto">إدراج</span>
+                </div>
+                <div class="ribbon-group">
+                    <button onclick="doWToc()" class="ribbon-btn"><i class="fas fa-table-list text-blue-600"></i><span>جدول محتويات</span></button>
+                    <span class="text-[8px] text-gray-400 mt-auto">مراجع</span>
+                </div>
+                <div class="ribbon-group">
+                    <button onclick="openTrans()" class="ribbon-btn"><i class="fas fa-language text-blue-500"></i><span>الترجمة</span></button>
+                    <span class="text-[8px] text-gray-400 mt-auto">مراجعة</span>
+                </div>
+            `,
+            excel: `
+                <div class="ribbon-group">
+                    <button onclick="openXlVal()" class="ribbon-btn"><i class="fas fa-check-double text-green-700"></i><span>تحقق البيانات</span></button>
+                    <button onclick="doXlProtect()" class="ribbon-btn"><i class="fas fa-shield-alt"></i><span>حماية الورقة</span></button>
+                    <span class="text-[8px] text-gray-400 mt-auto">بيانات</span>
+                </div>
+                <div class="ribbon-group">
+                    <button onclick="doXlFreeze()" class="ribbon-btn"><i class="fas fa-snowflake text-blue-400"></i><span>تجميد الأجزاء</span></button>
+                    <button onclick="doXlLink()" class="ribbon-btn"><i class="fas fa-link"></i><span>بيانات مرتبطة</span></button>
+                    <span class="text-[8px] text-gray-400 mt-auto">عرض</span>
+                </div>
+            `,
+            ppt: `
+                <div class="ribbon-group">
+                    <button onclick="doPMaster()" class="ribbon-btn"><i class="fas fa-clone text-orange-600"></i><span>الشكل الرئيسي</span></button>
+                    <span class="text-[8px] text-gray-400 mt-auto">عرض</span>
+                </div>
+                <div class="ribbon-group">
+                    <button onclick="doPExport()" class="ribbon-btn"><i class="fas fa-file-export"></i><span>تصدير الحزمة</span></button>
+                    <span class="text-[8px] text-gray-400 mt-auto">ملف</span>
+                </div>
+            `
+        };
+
+        function renderRibbon(app) {
+            document.getElementById('ribbon').innerHTML = ribbons[app];
+        }
+
+        const skillMap = {
+            word: [
+                {id: 'w_style', text: "تنسيق العناوين (العنوان 1)"},
+                {id: 'w_list', text: "إنشاء قائمة متعددة المستويات"},
+                {id: 'w_import', text: "استيراد محتوى من ملف خارجي"},
+                {id: 'w_translate', text: "ترجمة النص أو المستند"},
+                {id: 'w_toc', text: "إدراج جدول محتويات وتحديثه"}
+            ],
+            excel: [
+                {id: 'e_val', text: "التحقق من صحة البيانات"},
+                {id: 'e_freeze', text: "تجميد الصفوف في ورقة العمل"},
+                {id: 'e_link', text: "تحويل النص لبيانات مرتبطة"},
+                {id: 'e_protect', text: "حماية وتأمين ورقة العمل"}
+            ],
+            ppt: [
+                {id: 'p_master', text: "تطبيق الشكل الرئيسي (Slide Master)"},
+                {id: 'p_export', text: "تصدير العرض التقديمي كحزمة"}
+            ]
+        };
+
+        function loadSkillsSidebar(app) {
+            const list = document.getElementById('skills-list');
+            list.innerHTML = skillMap[app].map(s => `
+                <div class="sidebar-step p-3 text-[11px] flex items-center gap-2 ${studentData.skills[s.id] ? 'completed' : 'active'}">
+                    <i class="fas ${studentData.skills[s.id] ? 'fa-check-circle text-green-600' : 'fa-circle text-slate-200'}"></i>
+                    <span>${s.text}</span>
+                </div>
+            `).join('');
+        }
+
+        // --- Word Logic ---
+        window.doWStyle = () => {
+            const sel = window.getSelection();
+            if (sel.rangeCount && sel.toString().length > 2) {
+                document.execCommand('formatBlock', false, 'H2');
+                const el = sel.getRangeAt(0).commonAncestorContainer.parentElement;
+                el.style.color = "#1e3a8a";
+                el.style.borderRight = "5px solid #1e3a8a";
+                el.style.paddingRight = "10px";
+                studentData.skills.w_style = true;
+                showToast("تم تطبيق النمط!");
+                saveProgress();
+            } else { showToast("ظللي عنواناً أولاً."); }
+        };
+
+        window.doWList = () => {
+            document.getElementById('w-list-target').innerHTML = `
+                <ol class="list-decimal space-y-2">
+                    <li class="font-bold">المجتمع الحيوي
+                        <ul class="list-disc mr-6 mt-1 text-slate-600">
+                            <li>تعزيز القيم الإسلامية</li>
+                            <li>تمكين حياة عامرة وصحية</li>
+                        </ul>
+                    </li>
+                    <li class="font-bold">الاقتصاد المزدهر
+                        <ul class="list-disc mr-6 mt-1 text-slate-600">
+                            <li>تنمية وتنويع الاقتصاد</li>
+                            <li>زيادة معدلات التوظيف</li>
+                        </ul>
+                    </li>
+                </ol>
+            `;
+            studentData.skills.w_list = true;
+            showToast("تم إنشاء القائمة متعددة المستويات.");
+            saveProgress();
+        };
+
+        window.doWImport = () => {
+            showToast("جاري استيراد (نيوم.docx)...");
+            setTimeout(() => {
+                document.getElementById('w-import-target').classList.remove('hidden');
+                studentData.skills.w_import = true;
+                saveProgress();
+            }, 1000);
+        };
+
+        window.openTrans = () => {
+            const sel = window.getSelection().toString();
+            document.getElementById('trans-preview').innerText = sel ? sel : "[المستند كاملاً]";
+            document.getElementById('modal-overlay').classList.remove('hidden');
+            document.getElementById('modal-overlay').classList.add('flex');
+            document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
+            document.getElementById('dlg-trans').classList.remove('hidden');
+        };
+
+        window.doTranslate = (mode) => {
+            showToast("جاري الترجمة...");
+            setTimeout(() => {
+                if (mode === 'all') {
+                    document.getElementById('word-doc').innerHTML = `<h1 class='text-3xl font-bold mb-4'>Saudi Vision 2030</h1><p>A strategic framework to reduce dependence on oil and develop public service sectors.</p>`;
+                }
+                studentData.skills.w_translate = true;
+                showToast("تمت الترجمة بنجاح.");
+                window.closeModals();
+                saveProgress();
+            }, 1000);
+        };
+
+        window.doWToc = () => {
+            if (!studentData.skills.w_style) return showToast("طبقي الأنماط أولاً!");
+            const toc = document.getElementById('toc-area');
+            toc.classList.remove('hidden');
+            document.getElementById('toc-placeholder').innerHTML = `
+                <div class="flex justify-between border-b border-dotted py-1"><span>رؤية المملكة 2030</span><span>1</span></div>
+                <div class="flex justify-between border-b border-dotted py-1"><span>أهداف المجتمع الحيوي</span><span>2</span></div>
+            `;
+            studentData.skills.w_toc = true;
+            showToast("تم إدراج الجدول.");
+            saveProgress();
+        };
+
+        // --- Excel Logic ---
+        window.selectedRows = new Set();
+        function initExcelGrid() {
+            const grid = document.getElementById('xl-grid');
+            grid.innerHTML = `<div class="excel-cell excel-header">#</div>` + ['A','B','C','D','E','F'].map(l => `<div class="excel-cell excel-header">${l}</div>`).join('');
+            const r1 = ['المنطقة', 'التقدير', 'المهارة', 'النسبة', 'التاريخ', 'الحالة'];
+            grid.innerHTML += `<div class="excel-cell excel-header frozen-row" onclick="window.selectRow(1)">1</div>` + r1.map(t => `<div class="excel-cell excel-header frozen-row">${t}</div>`).join('');
+            for (let i = 2; i <= 10; i++) {
+                grid.innerHTML += `<div class="excel-cell excel-header" onclick="window.selectRow(${i})">${i}</div>`;
+                for (let j = 0; j < 6; j++) {
+                    grid.innerHTML += `<div contenteditable="true" class="excel-cell border" id="xl-${i}-${j}"></div>`;
+                }
+            }
+            document.getElementById('xl-2-0').innerText = "الرياض";
+            document.getElementById('xl-3-0').innerText = "مكة المكرمة";
+            document.getElementById('xl-4-0').innerText = "المنطقة الشرقية";
+        }
+
+        window.selectRow = (row) => {
+            if (row === 1) return;
+            const cells = document.querySelectorAll(`[id^="xl-${row}-"]`);
+            if (window.selectedRows.has(row)) {
+                window.selectedRows.delete(row);
+                cells.forEach(c => c.classList.remove('selected'));
+            } else {
+                window.selectedRows.add(row);
+                cells.forEach(c => c.classList.add('selected'));
+            }
+            document.getElementById('xl-sel-count').innerText = `محدد: ${window.selectedRows.size} صفوف`;
+        };
+
+        window.openXlVal = () => {
+            if (window.selectedRows.size === 0) return showToast("حددي صَفاً أولاً.");
+            document.getElementById('modal-overlay').classList.remove('hidden');
+            document.getElementById('modal-overlay').classList.add('flex');
+            document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
+            document.getElementById('dlg-val').classList.remove('hidden');
+        };
+
+        window.applyXlValidation = () => {
+            const src = document.getElementById('xl-val-src').value;
+            if (src.length > 3) {
+                window.selectedRows.forEach(row => {
+                    const cell = document.getElementById(`xl-${row}-1`);
+                    cell.innerHTML = `<select class="w-full bg-transparent outline-none">${src.split(',').map(s => `<option>${s.trim()}</option>`).join('')}</select>`;
+                });
+                studentData.skills.e_val = true;
+                window.closeModals();
+                saveProgress();
+            } else { showToast("أدخلي المصدر!"); }
+        };
+
+        window.doXlFreeze = () => {
+            document.querySelectorAll('.frozen-row').forEach(h => h.style.background = "#dcfce7");
+            studentData.skills.e_freeze = true;
+            showToast("تم تجميد الصف العلوي.");
+            saveProgress();
+        };
+
+        window.doXlLink = () => {
+            window.selectedRows.forEach(row => {
+                const cell = document.getElementById(`xl-${row}-0`);
+                cell.classList.add('text-blue-600', 'underline');
+                cell.innerHTML += ' <i class="fas fa-info-circle text-[8px]"></i>';
+            });
+            studentData.skills.e_link = true;
+            showToast("تم ربط البيانات.");
+            saveProgress();
+        };
+
+        window.doXlProtect = () => {
+            studentData.skills.e_protect = true;
+            showToast("تمت حماية الورقة.");
+            saveProgress();
+        };
+
+        // --- PPT Logic ---
+        window.doPMaster = () => {
+            const main = document.getElementById('ppt-slide-main');
+            const tag = document.getElementById('ppt-master-tag');
+            const active = main.classList.toggle('master-active');
+            tag.classList.toggle('hidden', !active);
+            if (active) {
+                studentData.skills.p_master = true;
+                showToast("وضع الشكل الرئيسي نَشِط.");
+                saveProgress();
+            }
+        };
+
+        window.doPExport = () => {
+            showToast("جاري تصدير الحزمة...");
+            setTimeout(() => {
+                studentData.skills.p_export = true;
+                saveProgress();
+            }, 1000);
+        };
+
+        // --- Teacher Logic ---
+        window.openTeacherAuth = () => {
+            document.getElementById('modal-overlay').classList.remove('hidden');
+            document.getElementById('modal-overlay').classList.add('flex');
+            document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
+            document.getElementById('dlg-teacher').classList.remove('hidden');
+        };
+
+        window.handleTeacherLogin = () => {
+            if (document.getElementById('teacher-pass').value === "abeer2026") {
+                window.closeModals();
+                loadTeacherData();
+            } else { document.getElementById('teacher-err').classList.remove('hidden'); }
+        };
+
+        function loadTeacherData() {
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-main').classList.add('hidden');
+            document.getElementById('view-teacher').classList.remove('hidden');
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => {
+                const tbody = document.getElementById('teacher-table');
+                tbody.innerHTML = '';
+                document.getElementById('no-data').classList.toggle('hidden', !snap.empty);
+                snap.forEach(d => {
+                    const data = d.data();
+                    const done = Object.values(data.skills || {}).filter(v => v).length;
+                    const perc = Math.round((done / totalSkills) * 100);
+                    tbody.innerHTML += `
+                        <tr class="border-b hover:bg-slate-50 transition">
+                            <td class="p-5 font-bold">${data.name}</td>
+                            <td class="p-5 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px]">${data.class}</span></td>
+                            <td class="p-5">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-green-500 h-full" style="width: ${perc}%"></div></div>
+                                    <span class="text-[10px] font-bold">${perc}%</span>
+                                </div>
+                            </td>
+                            <td class="p-5 text-center">${data.skills?.w_toc ? '✅' : '❌'}</td>
+                            <td class="p-5 text-center">${data.skills?.e_val ? '✅' : '❌'}</td>
+                            <td class="p-5 text-center">${data.skills?.p_master ? '✅' : '❌'}</td>
+                            <td class="p-5 text-[10px] text-slate-400">${data.timestamp?.toDate().toLocaleString('ar-SA') || '--'}</td>
+                        </tr>`;
+                });
             });
         }
+
+        // --- Helpers ---
+        window.closeModals = () => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            document.getElementById('modal-overlay').classList.remove('flex');
+        };
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.style.opacity = "1";
+            t.style.transform = "translateY(0)";
+            setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translateY(-10px)"; }, 3000);
+        }
+
+        init();
     </script>
 </body>
 </html>
