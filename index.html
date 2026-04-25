@@ -34,10 +34,8 @@
         .ppt-slide-editable:hover { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
         .ppt-slide-editable:focus { border-color: #2563eb; border-style: solid; background: transparent; }
 
-        /* Fix for potential freezing during typing */
-        [contenteditable] {
-            -webkit-user-modify: read-write-plaintext-only;
-        }
+        [contenteditable] { -webkit-user-modify: read-write-plaintext-only; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -49,16 +47,16 @@
                 <i class="fas fa-desktop text-5xl mb-4 text-blue-200"></i>
                 <h1 class="text-2xl font-bold">معمل المهارات الرقمية</h1>
                 <div class="mt-4 p-3 bg-white/10 rounded-xl text-sm">
-                    <p class="font-bold">المعلمة: عبير الحازمي</p>
-                    <p class="opacity-80">مديرة المدرسة: مريم عجيبي</p>
+                    <p class="font-bold text-lg">المعلمة: عبير الحازمي</p>
+                    <p class="opacity-80 font-bold">مديرة المدرسة: مريم عجيبي</p>
                 </div>
             </div>
             <div class="p-8 space-y-5">
                 <div>
                     <label class="block text-xs font-bold text-slate-400 mb-1 mr-1">اختيار الفصل:</label>
                     <select id="st-class" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-blue-500 transition-all text-sm">
-                        <option value="أ">ثالث متوسط (أ)</option>
-                        <option value="ب">ثالث متوسط (ب)</option>
+                        <option value="ثالث متوسط (أ)">ثالث متوسط (أ)</option>
+                        <option value="ثالث متوسط (ب)">ثالث متوسط (ب)</option>
                     </select>
                 </div>
                 <div>
@@ -69,7 +67,7 @@
                     دخول المحاكي الذكي <i class="fas fa-play ml-2"></i>
                 </button>
                 <button onclick="openTeacherAuth()" class="w-full text-blue-600 font-bold text-sm hover:underline py-2">
-                    <i class="fas fa-lock ml-1"></i> دخول المعلمة
+                    <i class="fas fa-lock ml-1 text-xs"></i> دخول المعلمة
                 </button>
             </div>
         </div>
@@ -90,10 +88,10 @@
         </div>
     </nav>
 
-    <main class="flex-1 flex flex-col lg:flex-row p-4 gap-6 overflow-hidden">
+    <main id="main-content-wrapper" class="flex-1 flex flex-col lg:flex-row p-4 gap-6 overflow-hidden">
         
         <!-- Sidebar: Intelligent Assistant -->
-        <div class="lg:w-80 flex flex-col gap-4 shrink-0 overflow-y-auto no-scrollbar">
+        <div id="ai-sidebar" class="lg:w-80 flex flex-col gap-4 shrink-0 overflow-y-auto no-scrollbar">
             <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
                 <h3 class="font-bold text-blue-800 mb-3 flex items-center gap-2 border-b pb-2">
                     <i class="fas fa-lightbulb text-amber-500"></i> المساعد الذكي
@@ -104,9 +102,7 @@
                 </div>
                 <div id="ai-steps">
                     <h4 class="text-[10px] font-bold text-slate-400 uppercase">خطوات الإنجاز:</h4>
-                    <div id="steps-list" class="mt-2 space-y-2 text-[11px]">
-                        <!-- Steps injected here -->
-                    </div>
+                    <div id="steps-list" class="mt-2 space-y-2 text-[11px]"></div>
                 </div>
             </div>
 
@@ -122,19 +118,17 @@
         </div>
 
         <!-- Editor Container -->
-        <div class="flex-1 bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200 flex flex-col">
+        <div id="editor-container" class="flex-1 bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200 flex flex-col">
             
             <!-- App Tabs -->
-            <div class="bg-slate-50 flex text-[12px] font-bold border-b">
+            <div id="app-tabs-container" class="bg-slate-50 flex text-[12px] font-bold border-b">
                 <button onclick="switchApp('word')" id="tab-word" class="tab-btn p-4 px-10 transition active">Word</button>
                 <button onclick="switchApp('excel')" id="tab-excel" class="tab-btn p-4 px-10 transition opacity-50">Excel</button>
                 <button onclick="switchApp('ppt')" id="tab-ppt" class="tab-btn p-4 px-10 transition opacity-50">PowerPoint</button>
             </div>
 
             <!-- Ribbon -->
-            <div id="ribbon" class="h-20 bg-[#f8fafc] border-b p-2 flex items-center overflow-x-auto gap-2">
-                <!-- Toolbar buttons injected based on current app -->
-            </div>
+            <div id="ribbon" class="h-20 bg-[#f8fafc] border-b p-2 flex items-center overflow-x-auto gap-2"></div>
 
             <!-- Content Area -->
             <div class="flex-1 bg-slate-200 p-4 md:p-8 overflow-auto relative" id="editor-viewport">
@@ -164,9 +158,7 @@
                             <span>انقري على أرقام الصفوف لاختيار عدة صفوف للتنسيق الجماعي</span>
                             <span id="xl-sel-count">محدد: 0 صفوف</span>
                         </div>
-                        <div id="excel-grid" class="grid grid-cols-[45px_repeat(5,1fr)] bg-slate-300 gap-[1px] border border-slate-400">
-                            <!-- Excel Table Injected -->
-                        </div>
+                        <div id="excel-grid" class="grid grid-cols-[45px_repeat(5,1fr)] bg-slate-300 gap-[1px] border border-slate-400"></div>
                         <div id="input-msg-box" class="excel-input-msg hidden"></div>
                     </div>
                 </div>
@@ -174,21 +166,17 @@
                 <!-- PowerPoint View -->
                 <div id="view-ppt" class="hidden h-full">
                     <div class="flex flex-col md:flex-row gap-6 h-full">
-                        <!-- Slide Thumbnails -->
                         <div class="w-full md:w-48 flex flex-row md:flex-col gap-3 overflow-auto no-scrollbar shrink-0">
                             <div class="aspect-video bg-white border-4 border-blue-500 p-2 text-[5px] shadow-lg rounded-lg cursor-pointer" id="thumb-1">
                                 <div class="font-bold border-b mb-1">الشريحة الرئيسية</div>
                                 <p>مشروع نيوم</p>
                             </div>
                             <div class="aspect-video bg-white opacity-40 p-2 text-[5px] rounded-lg border border-slate-300">الشريحة 2</div>
-                            <div class="aspect-video bg-white opacity-40 p-2 text-[5px] rounded-lg border border-slate-300">الشريحة 3</div>
                         </div>
-                        <!-- Main Stage -->
                         <div class="flex-1 flex flex-col items-center justify-center">
                             <div id="ppt-slide" class="aspect-video w-full max-w-2xl bg-white shadow-2xl p-12 flex flex-col items-center justify-center text-center transition-all duration-500 rounded-xl relative overflow-hidden theme-default">
                                 <div id="ppt-title" class="ppt-slide-editable text-4xl font-bold mb-4 w-full" contenteditable="true" oninput="checkPptInput()">انقري هنا واكتبي اسم المشروع</div>
                                 <div id="ppt-body" class="ppt-slide-editable text-xl opacity-70 w-full" contenteditable="true" oninput="checkPptInput()">انقري هنا لإضافة نص فرعي</div>
-                                <div class="absolute bottom-6 right-8 text-[10px] opacity-40 font-bold">الشريحة رقم 1</div>
                             </div>
                             <div id="master-badge" class="mt-4 bg-amber-500 text-white px-6 py-1.5 rounded-full text-xs font-bold hidden animate-pulse shadow-lg border-2 border-white">
                                 <i class="fas fa-crown ml-2"></i> نمط "الشريحة الرئيسية" نَشِط
@@ -199,26 +187,27 @@
 
                 <!-- Teacher Results View -->
                 <div id="view-teacher-results" class="hidden">
-                    <div class="bg-white p-8 rounded-3xl shadow-xl">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border border-blue-100">
                         <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold">سجل إنجازات الطالبات</h2>
-                            <button onclick="switchApp('word')" class="bg-slate-100 px-4 py-2 rounded-xl text-sm font-bold">العودة للمحاكي</button>
+                            <div class="flex items-center gap-3 text-slate-800">
+                                <i class="fas fa-list-check text-blue-600 text-2xl"></i>
+                                <h2 class="text-2xl font-bold">سجل إنجازات الطالبات</h2>
+                            </div>
+                            <button onclick="window.location.reload()" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 shadow-lg transition">عودة للصفحة الرئيسية</button>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto rounded-xl border border-slate-100">
                             <table class="w-full text-right text-sm">
                                 <thead class="bg-slate-50 border-b">
                                     <tr>
                                         <th class="p-4">اسم الطالبة</th>
                                         <th class="p-4 text-center">الفصل</th>
-                                        <th class="p-4 text-center">الإنجاز</th>
+                                        <th class="p-4 text-center">نسبة الإنجاز</th>
                                         <th class="p-4 text-center">آخر تحديث</th>
                                     </tr>
                                 </thead>
-                                <tbody id="teacher-table-body">
-                                    <!-- Data injected via Firestore listener -->
-                                </tbody>
+                                <tbody id="teacher-table-body"></tbody>
                             </table>
-                            <div id="no-data-msg" class="p-10 text-center text-slate-400 italic">لا توجد بيانات مسجلة حالياً</div>
+                            <div id="no-data-msg" class="p-20 text-center text-slate-400 italic font-bold">لا توجد بيانات مسجلة حالياً</div>
                         </div>
                     </div>
                 </div>
@@ -227,60 +216,52 @@
         </div>
     </main>
 
-    <!-- Data Validation Dialog (Excel) -->
+    <!-- Modals -->
     <div id="dialog-overlay" class="fixed inset-0 bg-black/60 z-[3000] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <!-- Excel Validation -->
         <div id="dlg-validation" class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden hidden animate-in zoom-in duration-200">
             <div class="bg-slate-100 p-3 flex text-[10px] font-bold border-b gap-4">
                 <button onclick="switchDlgTab('settings')" id="dt-settings" class="dialog-tab active px-3 pb-1">إعدادات</button>
                 <button onclick="switchDlgTab('input')" id="dt-input" class="dialog-tab px-3 pb-1">رسالة إدخل</button>
                 <button onclick="switchDlgTab('error')" id="dt-error" class="dialog-tab px-3 pb-1">تنبيه إلى الخطأ</button>
             </div>
-            
             <div class="p-6">
-                <!-- Tab: Settings -->
                 <div id="tab-v-settings" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">السماح بـ:</label>
-                        <select id="v-type" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 ring-blue-500" onchange="toggleVSource(this.value)">
-                            <option value="any">أي قيمة</option>
-                            <option value="list">قائمة</option>
-                            <option value="whole">عدد صحيح</option>
-                            <option value="date">تاريخ</option>
-                        </select>
-                    </div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">السماح بـ:</label>
+                    <select id="v-type" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 ring-blue-500" onchange="toggleVSource(this.value)">
+                        <option value="any">أي قيمة</option>
+                        <option value="list">قائمة</option>
+                        <option value="whole">عدد صحيح</option>
+                    </select>
                     <div id="v-source-box" class="hidden">
                         <label class="block text-xs font-bold text-slate-500 mb-1">المصدر (افصلي بفاصلة):</label>
                         <input type="text" id="v-source" placeholder="ممتاز, جيد, مقبول" class="w-full p-2 border rounded-lg text-sm">
                     </div>
                 </div>
-
-                <!-- Tab: Input Message -->
                 <div id="tab-v-input" class="hidden space-y-4">
-                    <p class="text-[10px] text-slate-400">هذه الرسالة تظهر للطالبة بمجرد الوقوف على الخلية.</p>
                     <input type="text" id="v-in-title" placeholder="عنوان التوجيه" class="w-full p-2 border rounded-lg text-sm">
                     <textarea id="v-in-body" placeholder="اكتبي تعليمات الإدخل هنا..." class="w-full p-2 border rounded-lg text-sm h-20"></textarea>
                 </div>
-
-                <!-- Tab: Error Alert -->
                 <div id="tab-v-error" class="hidden space-y-4">
-                    <p class="text-[10px] text-slate-400">تظهر عند إدخال قيمة لا تطابق الشروط.</p>
                     <input type="text" id="v-err-title" placeholder="عنوان رسالة الخطأ" class="w-full p-2 border rounded-lg text-sm">
                     <textarea id="v-err-body" placeholder="اكتبي رسالة التنبيه هنا..." class="w-full p-2 border rounded-lg text-sm h-20"></textarea>
                 </div>
-
                 <div class="mt-8 flex justify-end gap-2">
                     <button onclick="closeDialogs()" class="px-4 py-2 text-sm text-slate-400 font-bold">إلغاء</button>
-                    <button onclick="applyValidation()" class="bg-blue-600 text-white px-8 py-2 rounded-xl font-bold shadow-lg shadow-blue-200">موافق</button>
+                    <button onclick="applyValidation()" class="bg-blue-600 text-white px-8 py-2 rounded-xl font-bold shadow-lg">موافق</button>
                 </div>
             </div>
         </div>
 
-        <!-- Teacher Login Dialog -->
+        <!-- Teacher Login -->
         <div id="dlg-teacher" class="bg-white rounded-3xl p-10 w-full max-w-sm hidden text-center shadow-2xl animate-in zoom-in duration-200">
-            <h3 class="font-bold text-xl mb-6">دخول المعلمة</h3>
-            <input type="password" id="teacher-pass" placeholder="كلمة المرور..." class="w-full p-4 border rounded-2xl text-center mb-6 focus:ring-2 ring-blue-500 outline-none">
-            <button onclick="handleTeacherLogin()" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-[#1a3a6b] transition">دخول</button>
-            <p id="teacher-err" class="text-red-500 text-xs mt-3 hidden font-bold">خطأ في كلمة المرور!</p>
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-lock text-2xl"></i>
+            </div>
+            <h3 class="font-bold text-xl mb-6 text-slate-800">دخول منطقة المعلمة</h3>
+            <input type="password" id="teacher-pass" placeholder="كلمة المرور..." class="w-full p-4 border rounded-2xl text-center mb-6 focus:ring-2 ring-blue-500 outline-none transition-all">
+            <button onclick="handleTeacherLogin()" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-[#1a3a6b] transition">عرض سجل الطالبات</button>
+            <p id="teacher-err" class="text-red-500 text-xs mt-3 hidden font-bold">كلمة المرور غير صحيحة!</p>
         </div>
     </div>
 
@@ -294,13 +275,12 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // --- Firebase Init ---
         let firebaseConfig = {};
         try {
             firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        } catch (e) { console.warn("Firebase config missing."); }
+        } catch (e) {}
         
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'advanced-sim-final-v1';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'advanced-sim-final-fixed-v2';
         let app, auth, db, isFirebaseInit = false;
 
         if (firebaseConfig && firebaseConfig.apiKey) {
@@ -310,7 +290,6 @@
             isFirebaseInit = true;
         }
 
-        // --- System State ---
         let student = { name: "", class: "", skills: {} };
         let currentApp = 'word';
         let selectedRows = new Set();
@@ -326,28 +305,19 @@
             } catch (e) { isAuthReady = true; }
         }
 
-        if (isFirebaseInit) { 
-            onAuthStateChanged(auth, u => { 
-                user = u; 
-                isAuthReady = true; 
-            }); 
-        }
+        if (isFirebaseInit) { onAuthStateChanged(auth, u => { user = u; isAuthReady = true; }); }
 
-        // --- Global Functions for UI ---
         window.startSimulation = async () => {
             const nameInput = document.getElementById('st-name').value.trim();
-            if (nameInput.length < 5) {
-                showToast("يرجى إدخال اسمكِ بشكل صحيح.");
-                return;
-            }
+            if (nameInput.length < 5) return showToast("يرجى إدخال اسمكِ الثلاثي.");
+            if (!isAuthReady) return showToast("جاري الربط بالسحابة...");
+
             student.name = nameInput;
             student.class = document.getElementById('st-class').value;
-            
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('display-name').innerText = student.name;
             document.getElementById('display-class').innerText = student.class;
             document.getElementById('header-teacher-btn').classList.remove('hidden');
-            
             initExcelGrid();
             window.switchApp('word');
             await saveProgress();
@@ -356,26 +326,20 @@
         window.saveProgress = async () => {
             updateGlobalProg();
             if (!isFirebaseInit || !user) return;
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', user.uid), {
-                    ...student,
-                    timestamp: serverTimestamp()
-                }, { merge: true });
-            } catch (e) { console.error(e); }
+            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', user.uid), { ...student, timestamp: serverTimestamp() }, { merge: true }); } catch (e) {}
         };
 
         window.switchApp = (app) => {
             currentApp = app;
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.add('opacity-50');
-                b.classList.remove('active');
-            });
-            document.getElementById(`tab-${app}`).classList.remove('opacity-50');
-            document.getElementById(`tab-${app}`).classList.add('active');
-
             document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
-            document.getElementById(`view-${app}`).classList.remove('hidden');
-
+            document.getElementById('app-tabs-container').classList.remove('hidden');
+            document.getElementById('ribbon').classList.remove('hidden');
+            document.getElementById('ai-sidebar').classList.remove('hidden');
+            const targetView = document.getElementById(`view-${app}`);
+            if(targetView) targetView.classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(b => { b.classList.add('opacity-50'); b.classList.remove('active'); });
+            const activeTab = document.getElementById(`tab-${app}`);
+            if(activeTab) { activeTab.classList.remove('opacity-50'); activeTab.classList.add('active'); }
             renderRibbon(app);
             updateAssistant(app);
         };
@@ -383,249 +347,65 @@
         const appDetails = {
             word: {
                 benefit: "جدول المحتويات والأنماط تجعل البحوث والتقارير منظمة واحترافية، وتسهل الوصول السريع للمعلومات.",
-                steps: [
-                    { id: 'w1', text: "ظللي العناوين ثم طبقي نمط (العنوان 1)." },
-                    { id: 'w2', text: "أنشئي قائمة أهداف متعددة المستويات." },
-                    { id: 'w3', text: "استخدمي أداة (استيراد) لإحضار معلومات نيوم." },
-                    { id: 'w4', text: "أدرجي جدول المحتويات لمشاهدة الفهرس." }
-                ],
-                ribbon: `
-                    <button onclick="doWStyle()" class="office-btn"><i class="fas fa-heading text-blue-600"></i><span>العنوان 1</span></button>
-                    <button onclick="doWList()" class="office-btn"><i class="fas fa-list-ol text-blue-600"></i><span>قائمة</span></button>
-                    <div class="h-10 w-px bg-slate-200 mx-2"></div>
-                    <button onclick="doWImport()" class="office-btn"><i class="fas fa-file-import text-purple-600"></i><span>استيراد</span></button>
-                    <button onclick="doWToc()" class="office-btn"><i class="fas fa-table-list text-blue-800"></i><span>فهرس</span></button>
-                    <button onclick="doWTrans()" class="office-btn"><i class="fas fa-language text-blue-400"></i><span>ترجمة</span></button>
-                `
+                steps: [{ id: 'w1', text: "ظللي العناوين ثم طبقي نمط (العنوان 1)." },{ id: 'w2', text: "أنشئي قائمة أهداف متعددة المستويات." },{ id: 'w3', text: "استخدمي أداة (استيراد) لإحضار معلومات نيوم." },{ id: 'w4', text: "أدرجي جدول المحتويات لمشاهدة الفهرس." }],
+                ribbon: `<button onclick="doWStyle()" class="office-btn"><i class="fas fa-heading text-blue-600"></i><span>العنوان 1</span></button><button onclick="doWList()" class="office-btn"><i class="fas fa-list-ol text-blue-600"></i><span>قائمة</span></button><div class="h-10 w-px bg-slate-200 mx-2"></div><button onclick="doWImport()" class="office-btn"><i class="fas fa-file-import text-purple-600"></i><span>استيراد</span></button><button onclick="doWToc()" class="office-btn"><i class="fas fa-table-list text-blue-800"></i><span>فهرس</span></button><button onclick="doWTrans()" class="office-btn"><i class="fas fa-language text-blue-400"></i><span>ترجمة</span></button>`
             },
             excel: {
                 benefit: "التحقق من صحة البيانات يمنع الأخطاء البشرية أثناء الإدخال، ويضمن بقاء البيانات دقيقة وموحدة.",
-                steps: [
-                    { id: 'e1', text: "حددي صفاً أو أكثر من أرقام الجانب." },
-                    { id: 'e2', text: "افتحي (التحقق من الصحة) واختاري نوع (قائمة)." },
-                    { id: 'e3', text: "اكتبي (رسالة إدخال) لتوجيه المستخدم." },
-                    { id: 'e4', text: "اكتبي (تنبيه خطأ) يظهر عند الإدخال الخاطئ." }
-                ],
-                ribbon: `
-                    <button onclick="openXlValDialog()" class="office-btn"><i class="fas fa-check-double text-green-600"></i><span>تحقق الصحة</span></button>
-                    <button onclick="doXlFreeze()" class="office-btn"><i class="fas fa-snowflake text-blue-500"></i><span>تجميد</span></button>
-                    <button onclick="doXlLink()" class="office-btn"><i class="fas fa-link text-blue-700"></i><span>ربط بيانات</span></button>
-                    <button onclick="doXlProtect()" class="office-btn"><i class="fas fa-shield-alt text-green-700"></i><span>حماية</span></button>
-                `
+                steps: [{ id: 'e1', text: "حددي صفاً أو أكثر من أرقام الجانب." },{ id: 'e2', text: "افتحي (التحقق من الصحة) واختاري نوع (قائمة)." },{ id: 'e3', text: "اكتبي (رسالة إدخال) لتوجيه المستخدم." },{ id: 'e4', text: "اكتبي (تنبيه خطأ) يظهر عند الإدخال الخاطئ." }],
+                ribbon: `<button onclick="openXlValDialog()" class="office-btn"><i class="fas fa-check-double text-green-600"></i><span>تحقق الصحة</span></button><button onclick="doXlFreeze()" class="office-btn"><i class="fas fa-snowflake text-blue-500"></i><span>تجميد</span></button><button onclick="doXlLink()" class="office-btn"><i class="fas fa-link text-blue-700"></i><span>ربط بيانات</span></button><button onclick="doXlProtect()" class="office-btn"><i class="fas fa-shield-alt text-green-700"></i><span>حماية</span></button>`
             },
             ppt: {
                 benefit: "الشريحة الرئيسية تضمن توحيد الخطوط والألوان في كل الشرائح بلمسة واحدة وتوفر الوقت والمجهود.",
-                steps: [
-                    { id: 'p1', text: "انقري على (شريحة رئيسية) لتفعيل وضع التصميم." },
-                    { id: 'p2', text: "اكتبي عنوان العرض في منتصف الشريحة." },
-                    { id: 'p3', text: "اختاري (تنسيق نيوم) لتطبيقه على كل العرض." },
-                    { id: 'p4', text: "صدّري العرض كحزمة عند الانتهاء." }
-                ],
-                ribbon: `
-                    <button onclick="toggleMasterMode()" class="office-btn"><i class="fas fa-crown text-amber-500"></i><span>شريحة رئيسية</span></button>
-                    <button onclick="applyPPTTheme('neom')" class="office-btn"><i class="fas fa-palette text-green-700"></i><span>تنسيق نيوم</span></button>
-                    <button onclick="applyPPTTheme('vision')" class="office-btn"><i class="fas fa-palette text-blue-800"></i><span>تنسيق الرؤية</span></button>
-                    <div class="h-10 w-px bg-slate-200 mx-1"></div>
-                    <button onclick="doPExport()" class="office-btn"><i class="fas fa-file-export text-slate-500"></i><span>تصدير</span></button>
-                `
+                steps: [{ id: 'p1', text: "انقري على (شريحة رئيسية) لتفعيل وضع التصميم." },{ id: 'p2', text: "اكتبي عنوان العرض في منتصف الشريحة." },{ id: 'p3', text: "اختاري (تنسيق نيوم) لتطبيقه على كل العرض." },{ id: 'p4', text: "صدّري العرض كحزمة عند الانتهاء." }],
+                ribbon: `<button onclick="toggleMasterMode()" class="office-btn"><i class="fas fa-crown text-amber-500"></i><span>شريحة رئيسية</span></button><button onclick="applyPPTTheme('neom')" class="office-btn"><i class="fas fa-palette text-green-700"></i><span>تنسيق نيوم</span></button><button onclick="applyPPTTheme('vision')" class="office-btn"><i class="fas fa-palette text-blue-800"></i><span>تنسيق الرؤية</span></button><div class="h-10 w-px bg-slate-200 mx-1"></div><button onclick="doPExport()" class="office-btn"><i class="fas fa-file-export text-slate-500"></i><span>تصدير</span></button>`
             }
         };
 
         window.renderRibbon = (app) => { document.getElementById('ribbon').innerHTML = appDetails[app].ribbon; };
-
         window.updateAssistant = (app) => {
             document.getElementById('benefit-text').innerText = appDetails[app].benefit;
-            document.getElementById('steps-list').innerHTML = appDetails[app].steps.map(s => `
-                <div class="flex items-center gap-2 p-2 rounded-xl border border-slate-100 ${student.skills[s.id] ? 'bg-green-50 opacity-60' : 'bg-slate-50'}">
-                    <i class="fas ${student.skills[s.id] ? 'fa-check-circle text-green-500' : 'fa-circle text-slate-300'}"></i>
-                    <span class="${student.skills[s.id] ? 'line-through text-slate-400' : ''}">${s.text}</span>
-                </div>
-            `).join('');
+            document.getElementById('steps-list').innerHTML = appDetails[app].steps.map(s => `<div class="flex items-center gap-2 p-2 rounded-xl border border-slate-100 ${student.skills[s.id] ? 'bg-green-50 opacity-60' : 'bg-slate-50'}"><i class="fas ${student.skills[s.id] ? 'fa-check-circle text-green-500' : 'fa-circle text-slate-300'}"></i><span class="${student.skills[s.id] ? 'line-through text-slate-400' : ''}">${s.text}</span></div>`).join('');
             updateGlobalProg();
         };
 
         window.updateGlobalProg = () => {
-            const total = 12; 
-            const done = Object.values(student.skills).filter(v => v === true).length;
-            const perc = Math.round((done / total) * 100);
+            const doneCount = Object.values(student.skills).filter(v => v === true).length;
+            const perc = Math.round((doneCount / 12) * 100);
             document.getElementById('perc-text').innerText = perc + "%";
             document.getElementById('perc-bar').style.width = perc + "%";
         };
 
-        // --- WORD FUNCTIONS ---
-        window.doWStyle = () => {
-            const sel = window.getSelection();
-            if (sel.rangeCount && sel.toString().length > 2) {
-                document.execCommand('formatBlock', false, 'H2');
-                const el = sel.getRangeAt(0).commonAncestorContainer.parentElement;
-                el.style.color = "#1e3a8a";
-                el.style.borderRight = "6px solid #2563eb";
-                el.style.paddingRight = "15px";
-                student.skills.w1 = true;
-                showToast("تم تطبيق النمط!");
-                saveProgress();
-                updateAssistant('word');
-            } else { showToast("ظللي أحد العناوين أولاً."); }
-        };
+        // --- APPS LOGIC ---
+        window.doWStyle = () => { const sel = window.getSelection(); if (sel.rangeCount && sel.toString().length > 2) { document.execCommand('formatBlock', false, 'H2'); const el = sel.getRangeAt(0).commonAncestorContainer.parentElement; el.style.color = "#1e3a8a"; el.style.borderRight = "6px solid #2563eb"; el.style.paddingRight = "15px"; student.skills.w1 = true; saveProgress(); updateAssistant('word'); showToast("تم تطبيق النمط!"); } else { showToast("ظللي أحد العناوين أولاً."); } };
+        window.doWList = () => { document.getElementById('w-list-placeholder').innerHTML = `<ol class="list-decimal space-y-2 font-bold mt-4"><li>المجتمع الحيوي<ul class="list-disc mr-6 mt-1 text-slate-600 font-normal"><li>تعزيز القيم الإسلامية</li><li>تمكين حياة صحية</li></ul></li></ol>`; student.skills.w2 = true; saveProgress(); updateAssistant('word'); };
+        window.doWImport = () => { showToast("جاري الاستيراد..."); setTimeout(() => { document.getElementById('w-import-placeholder').classList.remove('hidden'); student.skills.w3 = true; saveProgress(); updateAssistant('word'); }, 800); };
+        window.doWToc = () => { if (!student.skills.w1) return showToast("يجب تطبيق الأنماط أولاً!"); document.getElementById('toc-area').classList.remove('hidden'); document.getElementById('toc-list').innerHTML = `<div class="flex justify-between border-b border-dotted py-2"><span>رؤية المملكة 2030</span><span>صفحة 1</span></div>`; student.skills.w4 = true; saveProgress(); updateAssistant('word'); };
+        window.doWTrans = () => { showToast("جاري الترجمة..."); setTimeout(() => { document.getElementById('word-doc').innerHTML = `<h1 class='text-3xl font-bold mb-4'>Saudi Vision 2030</h1><p>Strategic framework for diversification.</p>`; }, 1000); };
 
-        window.doWList = () => {
-            document.getElementById('w-list-placeholder').innerHTML = `<ol class="list-decimal space-y-2 font-bold mt-4"><li>المجتمع الحيوي<ul class="list-disc mr-6 mt-1 text-slate-600 font-normal"><li>تعزيز القيم الإسلامية</li><li>تمكين حياة صحية</li></ul></li></ol>`;
-            student.skills.w2 = true;
-            saveProgress();
-            updateAssistant('word');
-        };
-
-        window.doWImport = () => {
-            showToast("جاري الاستيراد...");
-            setTimeout(() => {
-                document.getElementById('w-import-placeholder').classList.remove('hidden');
-                student.skills.w3 = true;
-                saveProgress();
-                updateAssistant('word');
-            }, 800);
-        };
-
-        window.doWToc = () => {
-            if (!student.skills.w1) return showToast("يجب تطبيق الأنماط أولاً!");
-            document.getElementById('toc-area').classList.remove('hidden');
-            document.getElementById('toc-list').innerHTML = `<div class="flex justify-between border-b border-dotted py-2"><span>رؤية المملكة 2030</span><span>صفحة 1</span></div>`;
-            student.skills.w4 = true;
-            saveProgress();
-            updateAssistant('word');
-        };
-
-        window.doWTrans = () => {
-            showToast("جاري الترجمة...");
-            setTimeout(() => {
-                document.getElementById('word-doc').innerHTML = `<h1 class='text-3xl font-bold mb-4'>Saudi Vision 2030</h1><p>Strategic framework for public service sector development.</p>`;
-            }, 1000);
-        };
-
-        // --- EXCEL FUNCTIONS ---
         window.initExcelGrid = () => {
-            const grid = document.getElementById('excel-grid');
-            if (!grid) return;
+            const grid = document.getElementById('excel-grid'); if (!grid) return;
             grid.innerHTML = `<div class='excel-cell bg-slate-100 font-bold justify-center'>#</div>` + ['A','B','C','D','E'].map(l => `<div class='excel-cell bg-slate-100 font-bold justify-center'>${l}</div>`).join('');
-            for (let i = 1; i <= 10; i++) {
-                grid.innerHTML += `<div class='excel-cell bg-slate-50 font-bold cursor-pointer justify-center hover:bg-blue-100' onclick='selXlRow(${i})'>${i}</div>`;
-                for (let j = 0; j < 5; j++) {
-                    grid.innerHTML += `<div contenteditable='true' class='excel-cell' id='xc-${i}-${j}' onfocus='xlOnFocus(${i},${j})' onblur='xlOnBlur()'></div>`;
-                }
-            }
-            document.getElementById('xc-1-0').innerText = "المنطقة";
-            document.getElementById('xc-1-1').innerText = "التقدير";
-            document.getElementById('xc-2-0').innerText = "الرياض";
+            for (let i = 1; i <= 10; i++) { grid.innerHTML += `<div class='excel-cell bg-slate-50 font-bold cursor-pointer justify-center hover:bg-blue-100' onclick='selXlRow(${i})'>${i}</div>`; for (let j = 0; j < 5; j++) { grid.innerHTML += `<div contenteditable='true' class='excel-cell' id='xc-${i}-${j}' onfocus='xlOnFocus(${i},${j})' onblur='xlOnBlur()'></div>`; } }
+            document.getElementById('xc-1-0').innerText = "المنطقة"; document.getElementById('xc-1-1').innerText = "التقدير";
         };
-
-        window.selXlRow = (r) => {
-            const cells = document.querySelectorAll(`[id^="xc-${r}-"]`);
-            if (selectedRows.has(r)) {
-                selectedRows.delete(r);
-                cells.forEach(c => c.classList.remove('selected-row'));
-            } else {
-                selectedRows.add(r);
-                cells.forEach(c => c.classList.add('selected-row'));
-            }
-            document.getElementById('xl-sel-count').innerText = `محدد: ${selectedRows.size} صفوف`;
-        };
-
-        window.openXlValDialog = () => {
-            if (selectedRows.size === 0) return showToast("حددي صَفاً أولاً.");
-            document.getElementById('dialog-overlay').classList.replace('hidden', 'flex');
-            document.getElementById('dlg-validation').classList.remove('hidden');
-        };
-
+        window.selXlRow = (r) => { const cells = document.querySelectorAll(`[id^="xc-${r}-"]`); if (selectedRows.has(r)) { selectedRows.delete(r); cells.forEach(c => c.classList.remove('selected-row')); } else { selectedRows.add(r); cells.forEach(c => c.classList.add('selected-row')); } document.getElementById('xl-sel-count').innerText = `محدد: ${selectedRows.size} صفوف`; };
+        window.openXlValDialog = () => { if (selectedRows.size === 0) return showToast("حددي صَفاً أولاً."); document.getElementById('dialog-overlay').classList.replace('hidden', 'flex'); document.getElementById('dlg-validation').classList.remove('hidden'); };
         window.toggleVSource = (v) => { document.getElementById('v-source-box').classList.toggle('hidden', v !== 'list'); };
-
-        window.switchDlgTab = (tab) => {
-            document.querySelectorAll('.dialog-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`dt-${tab}`).classList.add('active');
-            document.querySelectorAll('[id^="tab-v-"]').forEach(v => v.classList.add('hidden'));
-            document.getElementById(`tab-v-${tab}`).classList.remove('hidden');
-        };
-
-        window.applyValidation = () => {
-            const src = document.getElementById('v-source').value;
-            selectedRows.forEach(row => {
-                const target = document.getElementById(`xc-${row}-1`);
-                if (src.length > 2) target.innerHTML = `<select class='w-full bg-transparent outline-none'>${src.split(',').map(s => `<option>${s.trim()}</option>`).join('')}</select>`;
-                validationRules[`${row}-1`] = { title: document.getElementById('v-in-title').value, body: document.getElementById('v-in-body').value };
-            });
-            student.skills.e1 = student.skills.e2 = student.skills.e3 = student.skills.e4 = true;
-            closeDialogs();
-            saveProgress();
-            updateAssistant('excel');
-            showToast("تم تطبيق قاعدة التحقق!");
-        };
-
-        window.xlOnFocus = (r, c) => {
-            const rule = validationRules[`${r}-${c}`];
-            if (rule && rule.body) {
-                const box = document.getElementById('input-msg-box');
-                const cell = document.getElementById(`xc-${r}-${c}`);
-                const rect = cell.getBoundingClientRect();
-                box.style.left = (rect.right + 10) + "px";
-                box.style.top = rect.top + "px";
-                box.innerHTML = `<div class='font-bold'>${rule.title}</div>${rule.body}`;
-                box.classList.remove('hidden');
-            }
-        };
-
+        window.switchDlgTab = (tab) => { document.querySelectorAll('.dialog-tab').forEach(t => t.classList.remove('active')); document.getElementById(`dt-${tab}`).classList.add('active'); document.querySelectorAll('[id^="tab-v-"]').forEach(v => v.classList.add('hidden')); document.getElementById(`tab-v-${tab}`).classList.remove('hidden'); };
+        window.applyValidation = () => { const src = document.getElementById('v-source').value; selectedRows.forEach(row => { const target = document.getElementById(`xc-${row}-1`); if (src.length > 2) target.innerHTML = `<select class='w-full bg-transparent outline-none'>${src.split(',').map(s => `<option>${s.trim()}</option>`).join('')}</select>`; validationRules[`${row}-1`] = { title: document.getElementById('v-in-title').value, body: document.getElementById('v-in-body').value }; }); student.skills.e1 = student.skills.e2 = student.skills.e3 = student.skills.e4 = true; closeDialogs(); saveProgress(); updateAssistant('excel'); showToast("تم تطبيق قاعدة التحقق!"); };
+        window.xlOnFocus = (r, c) => { const rule = validationRules[`${r}-${c}`]; if (rule && rule.body) { const box = document.getElementById('input-msg-box'); const cell = document.getElementById(`xc-${r}-${c}`); const rect = cell.getBoundingClientRect(); box.style.left = (rect.right + 10) + "px"; box.style.top = rect.top + "px"; box.innerHTML = `<div class='font-bold'>${rule.title}</div>${rule.body}`; box.classList.remove('hidden'); } };
         window.xlOnBlur = () => { document.getElementById('input-msg-box').classList.add('hidden'); };
-
-        window.doXlFreeze = () => {
-            document.querySelectorAll('.excel-cell').forEach(c => { if(c.innerText === "المنطقة" || c.innerText === "التقدير") c.style.background = "#dcfce7"; });
-            showToast("تم تجميد الصف العلوي.");
-        };
-
+        window.doXlFreeze = () => { showToast("تم تجميد الصف العلوي."); };
         window.doXlProtect = () => { showToast("تم تأمين الورقة."); };
         window.doXlLink = () => { showToast("تم ربط البيانات."); };
 
-        // --- PPT ---
-        window.checkPptInput = () => {
-            const title = document.getElementById('ppt-title').innerText;
-            if (title.length > 5 && title !== "انقري هنا واكتبي اسم المشروع") {
-                if (!student.skills.p2) {
-                    student.skills.p2 = true;
-                    saveProgress();
-                    updateAssistant('ppt');
-                }
-            }
-        };
+        window.checkPptInput = () => { const title = document.getElementById('ppt-title').innerText; if (title.length > 5 && title !== "انقري هنا واكتبي اسم المشروع") { if (!student.skills.p2) { student.skills.p2 = true; saveProgress(); updateAssistant('ppt'); } } };
+        window.toggleMasterMode = () => { const badge = document.getElementById('master-badge'); const slide = document.getElementById('ppt-slide'); const isActive = badge.classList.toggle('hidden'); if (!isActive) { slide.classList.add('ring-4', 'ring-amber-400'); showToast("وضع الشريحة الرئيسية نَشِط."); student.skills.p1 = true; saveProgress(); updateAssistant('ppt'); } else { slide.classList.remove('ring-4', 'ring-amber-400'); } };
+        window.applyPPTTheme = (theme) => { const slide = document.getElementById('ppt-slide'); slide.classList.remove('theme-default', 'theme-neom', 'theme-vision'); slide.classList.add(theme === 'neom' ? 'theme-neom' : 'theme-vision'); showToast("تم تطبيق التنسيق."); student.skills.p3 = true; saveProgress(); updateAssistant('ppt'); };
+        window.doPExport = () => { showToast("جاري التصدير..."); student.skills.p4 = true; saveProgress(); updateAssistant('ppt'); };
 
-        window.toggleMasterMode = () => {
-            const badge = document.getElementById('master-badge');
-            const slide = document.getElementById('ppt-slide');
-            const isActive = badge.classList.toggle('hidden');
-            if (!isActive) {
-                slide.classList.add('ring-4', 'ring-amber-400');
-                showToast("أنتِ الآن في وضع الشريحة الرئيسية.");
-                student.skills.p1 = true;
-                saveProgress();
-                updateAssistant('ppt');
-            } else {
-                slide.classList.remove('ring-4', 'ring-amber-400');
-            }
-        };
-
-        window.applyPPTTheme = (theme) => {
-            const slide = document.getElementById('ppt-slide');
-            slide.classList.remove('theme-default', 'theme-neom', 'theme-vision');
-            slide.classList.add(theme === 'neom' ? 'theme-neom' : 'theme-vision');
-            showToast("تم تطبيق التنسيق.");
-            student.skills.p3 = true;
-            saveProgress();
-            updateAssistant('ppt');
-        };
-
-        window.doPExport = () => {
-            showToast("جاري التصدير...");
-            student.skills.p4 = true;
-            saveProgress();
-            updateAssistant('ppt');
-        };
-
-        // --- TEACHER LOGIC ---
+        // --- TEACHER LOGIC (REPAIRED) ---
         window.openTeacherAuth = () => {
             document.getElementById('dialog-overlay').classList.replace('hidden', 'flex');
             document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
@@ -635,47 +415,48 @@
         window.handleTeacherLogin = () => {
             const pass = document.getElementById('teacher-pass').value;
             if (pass === "abeer2026") {
+                document.getElementById('login-overlay').classList.add('hidden'); // Hide the first page completely
                 closeDialogs();
                 loadTeacherDashboard();
-            } else {
-                document.getElementById('teacher-err').classList.remove('hidden');
-            }
+            } else { document.getElementById('teacher-err').classList.remove('hidden'); }
         };
 
-        function loadTeacherDashboard() {
-            document.getElementById('view-word').classList.add('hidden');
-            document.getElementById('view-excel').classList.add('hidden');
-            document.getElementById('view-ppt').classList.add('hidden');
+        window.loadTeacherDashboard = () => {
+            // Completely hide simulation components
+            document.getElementById('ai-sidebar').classList.add('hidden');
+            document.getElementById('app-tabs-container').classList.add('hidden');
+            document.getElementById('ribbon').classList.add('hidden');
+            document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
+            
+            // Show result screen
             document.getElementById('view-teacher-results').classList.remove('hidden');
 
-            if (!isFirebaseInit) return;
+            const tbody = document.getElementById('teacher-table-body');
+            const noData = document.getElementById('no-data-msg');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!isFirebaseInit) {
+                noData.classList.remove('hidden');
+                noData.innerText = "قاعدة البيانات غير متصلة (وضع التجربة).";
+                return;
+            }
+
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => {
-                const tbody = document.getElementById('teacher-table-body');
                 tbody.innerHTML = '';
-                document.getElementById('no-data-msg').classList.toggle('hidden', !snap.empty);
+                if(snap.empty) { noData.classList.remove('hidden'); return; }
+                noData.classList.add('hidden');
                 snap.forEach(d => {
                     const data = d.data();
-                    const done = Object.values(data.skills || {}).filter(v => v === true).length;
-                    const perc = Math.round((done / totalSkills) * 100);
-                    tbody.innerHTML += `<tr class="border-b hover:bg-slate-50 transition"><td class="p-4 font-bold text-slate-800">${data.name}</td><td class="p-4 text-center font-bold text-blue-600">${data.class}</td><td class="p-4 text-center"><div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-green-500 h-full rounded-full" style="width: ${perc}%"></div></div><span class="text-[10px] font-bold">${perc}%</span></td><td class="p-4 text-[10px] text-slate-400">${data.timestamp?.toDate().toLocaleString('ar-SA') || '--'}</td></tr>`;
+                    const doneCount = Object.values(data.skills || {}).filter(v => v === true).length;
+                    const perc = Math.round((doneCount / 12) * 100);
+                    tbody.innerHTML += `<tr class="border-b hover:bg-slate-50 transition"><td class="p-4 font-bold text-slate-800">${data.name}</td><td class="p-4 text-center font-bold text-blue-600">${data.class || '---'}</td><td class="p-4 text-center"><div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-green-500 h-full rounded-full" style="width: ${perc}%"></div></div><span class="text-[10px] font-bold">${perc}%</span></td><td class="p-4 text-[10px] text-slate-400">${data.timestamp?.toDate().toLocaleString('ar-SA') || '--'}</td></tr>`;
                 });
-            });
-        }
-
-        // --- HELPERS ---
-        window.closeDialogs = () => {
-            document.getElementById('dialog-overlay').classList.replace('flex', 'hidden');
-            document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
+            }, (error) => { console.error(error); });
         };
 
-        window.showToast = (msg) => {
-            const t = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-msg');
-            msgEl.innerText = msg;
-            t.classList.add('opacity-100', 'translate-y-0');
-            t.classList.remove('opacity-0', '-translate-y-10');
-            setTimeout(() => { t.classList.add('opacity-0', '-translate-y-10'); t.classList.remove('opacity-100', 'translate-y-0'); }, 3000);
-        };
+        window.closeDialogs = () => { document.getElementById('dialog-overlay').classList.replace('flex', 'hidden'); document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden')); };
+        window.showToast = (msg) => { const t = document.getElementById('toast'); const msgEl = document.getElementById('toast-msg'); msgEl.innerText = msg; t.classList.add('opacity-100', 'translate-y-0'); t.classList.remove('opacity-0', '-translate-y-10'); setTimeout(() => { t.classList.add('opacity-0', '-translate-y-10'); t.classList.remove('opacity-100', 'translate-y-0'); }, 3000); };
 
         init();
     </script>
