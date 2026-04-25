@@ -3,367 +3,567 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محاكي مهارات أوفيس المتقدمة - الصف الثالث متوسط</title>
+    <title>المساعد الذكي - مهارات أوفيس المتقدمة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background-color: #f1f5f9; color: #1e293b; overflow-x: hidden; }
+        body { font-family: 'Tajawal', sans-serif; background-color: #f1f5f9; color: #1e293b; }
         
-        .ribbon-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; padding: 6px; border-radius: 4px; transition: 0.2s; min-width: 65px; height: 100%; }
-        .ribbon-btn:hover:not(:disabled) { background: #e2e6ea; color: #2b579a; }
-        .ribbon-group { display: flex; align-items: center; gap: 4px; border-left: 1px solid #ddd; padding: 0 10px; height: 100%; }
+        .tab-btn.active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: bold; background: #eff6ff; }
+        .office-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; padding: 6px; border-radius: 6px; min-width: 65px; transition: 0.2s; }
+        .office-btn:hover { background: #e2e8f0; }
 
-        .excel-grid { display: grid; grid-template-columns: 45px repeat(6, 1fr); background: #bbb; gap: 1px; border: 1px solid #999; }
-        .excel-cell { background: white; min-height: 32px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; outline: none; border: 1px solid transparent; }
-        .excel-cell.selected { background: #e7f1ff; border: 1px solid #217346 !important; }
-        .excel-header { background: #f3f3f3; font-weight: bold; justify-content: center; color: #444; cursor: pointer; transition: background 0.2s; }
-        .excel-header:hover { background: #e2e2e2; }
-        .frozen-row { position: sticky; top: 0; z-index: 50; background: #eee !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .excel-cell { background: white; border: 0.5px solid #cbd5e1; min-height: 30px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; outline: none; }
+        .excel-cell:focus { border: 2px solid #16a34a; z-index: 10; }
+        .selected-row { background: #e0f2fe !important; }
 
-        .word-page { background: white; min-height: 1000px; width: 100%; max-width: 800px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 70px; outline: none; }
-        .toc-box { border: 1px solid #e2e8f0; padding: 25px; background: #f8fafc; margin-bottom: 30px; border-radius: 8px; }
-
-        .ppt-slide { aspect-ratio: 16/9; background: white; border: 1px solid #cbd5e1; position: relative; overflow: hidden; transition: 0.5s; }
-        .master-active { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; color: white !important; border: 3px solid #f97316 !important; }
-
-        .sidebar-step { border-right: 4px solid #e2e8f0; transition: 0.3s; }
-        .sidebar-step.active { border-right-color: #2563eb; background: #eff6ff; }
-        .sidebar-step.completed { border-right-color: #22c55e; background: #f0fdf4; opacity: 0.8; }
+        .word-document { background: white; min-height: 800px; width: 100%; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 60px; outline: none; }
         
-        .active-tab-indicator { border-top: 4px solid #2b579a; color: #2b579a; font-weight: bold; background: white; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .dialog-tab.active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: bold; }
+        
+        /* Tooltip Simulation for Excel */
+        .excel-input-msg { position: absolute; background: #ffffca; border: 1px solid #cecece; padding: 10px; font-size: 11px; box-shadow: 3px 3px 10px rgba(0,0,0,0.1); z-index: 100; pointer-events: none; border-radius: 4px; max-width: 150px; }
+
+        /* PPT Themes */
+        .theme-default { background-color: white; color: #334155; }
+        .theme-neom { background: linear-gradient(135deg, #022c22 0%, #064e3b 100%) !important; color: #f0fdf4 !important; }
+        .theme-vision { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important; color: white !important; }
+        
+        .ppt-slide-editable { outline: none; border: 1px dashed transparent; transition: border 0.2s; }
+        .ppt-slide-editable:hover { border-color: #cbd5e1; }
+        .ppt-slide-editable:focus { border-color: #3b82f6; border-style: solid; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Navbar -->
-    <nav class="bg-[#2b579a] text-white p-3 flex justify-between items-center shadow-lg sticky top-0 z-[100]">
-        <div class="flex items-center gap-3">
-            <i class="fas fa-desktop text-2xl"></i>
-            <div>
-                <h1 class="font-bold text-sm md:text-base text-white">محاكي مهارات أوفيس (أ / ب)</h1>
-                <p class="text-[10px] opacity-80 text-blue-100">الصف الثالث متوسط - مهارات متقدمة</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <div id="user-info" class="hidden text-xs font-bold border-l pl-4 border-white/20">
-                الطالبة: <span id="user-name-tag"></span>
-            </div>
-            <button onclick="openTeacherAuth()" class="bg-white/10 hover:bg-white/20 px-4 py-1 rounded text-xs transition text-white">دخول المعلمة</button>
-        </div>
-    </nav>
-
-    <main class="flex-1 container mx-auto p-4">
-        
-        <!-- Login View -->
-        <div id="view-login" class="max-w-md mx-auto mt-16 bg-white p-8 rounded-3xl shadow-2xl border border-slate-100">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                    <i class="fas fa-user-graduate"></i>
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-300">
+            <div class="bg-[#2b579a] p-8 text-white text-center">
+                <i class="fas fa-desktop text-5xl mb-4 text-blue-200"></i>
+                <h1 class="text-2xl font-bold">معمل المهارات الرقمية</h1>
+                <div class="mt-4 p-3 bg-white/10 rounded-xl text-sm">
+                    <p class="font-bold">المعلمة: عبير الحازمي</p>
+                    <p class="opacity-80">مديرة المدرسة: مريم عجيبي</p>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800">تسجيل دخول الطالبة</h2>
-                <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-sm space-y-1">
-                    <p class="text-blue-900 font-bold">المعلمة: عبير الحازمي</p>
-                    <p class="text-slate-600 font-bold">مديرة المدرسة: مريم عجيبي</p>
-                </div>
-                <p class="text-slate-400 mt-4 text-[10px] italic">أهلاً بكِ في معمل الحاسب الآلي المتقدم</p>
             </div>
-            <div class="space-y-4">
+            <div class="p-8 space-y-5">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 mr-1">الصف الدراسي:</label>
-                    <select id="login-class" class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500 text-sm">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 mr-1">اختيار الفصل:</label>
+                    <select id="st-class" class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-blue-500 transition-all text-sm">
                         <option value="أ">ثالث متوسط (أ)</option>
                         <option value="ب">ثالث متوسط (ب)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1 mr-1">الاسم الثلاثي:</label>
-                    <input type="text" id="login-name" placeholder="اكتبي اسمكِ هنا..." class="w-full p-4 border rounded-2xl bg-slate-50 outline-none focus:ring-2 ring-blue-500 text-sm">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 mr-1">اسم الطالبة الثلاثي:</label>
+                    <input type="text" id="st-name" placeholder="أدخلي اسمكِ هنا..." class="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 ring-blue-500 text-sm">
                 </div>
-                <button onclick="startTraining()" id="start-btn" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-[#1a3a6b] transition transform hover:scale-[1.01]">
-                    ابدئي المحاكاة <i class="fas fa-arrow-left mr-2"></i>
+                <button onclick="startSimulation()" class="w-full bg-[#2b579a] hover:bg-[#1e3a8a] text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-95">
+                    دخول المحاكي الذكي <i class="fas fa-play ml-2"></i>
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- Main Hub -->
-        <div id="view-main" class="hidden animate-in fade-in duration-500">
-            <div class="flex flex-col lg:flex-row gap-6">
-                
-                <!-- Sidebar Progress -->
-                <div class="lg:w-80 space-y-4 shrink-0">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-check-circle text-green-500"></i> قائمة المهارات
-                        </h3>
-                        <div id="skills-list" class="space-y-2">
-                            <!-- Injected skills -->
-                        </div>
-                    </div>
+    <!-- Header -->
+    <nav class="bg-white border-b p-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg text-white"><i class="fas fa-laptop-code"></i></div>
+            <div>
+                <h1 class="font-bold text-sm">محاكي أوفيس المتقدم</h1>
+                <p class="text-[10px] text-slate-400 tracking-tight">اسم الطالبة: <span id="display-name" class="text-blue-600 font-bold"></span> | الفصل: <span id="display-class" class="font-bold"></span></p>
+            </div>
+        </div>
+        <button onclick="location.reload()" class="text-[10px] bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition font-bold">إنهاء الجلسة</button>
+    </nav>
 
-                    <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl">
-                        <div class="text-[10px] opacity-60 mb-1 font-bold">إجمالي الإتقان</div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span id="mastery-perc" class="text-2xl font-bold">0%</span>
-                            <span class="text-[10px] bg-blue-600 px-2 py-0.5 rounded" id="mastery-label">متدربة</span>
-                        </div>
-                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div id="mastery-bar" class="bg-blue-500 h-full transition-all duration-700" style="width: 0%"></div>
-                        </div>
+    <main class="flex-1 flex flex-col lg:flex-row p-4 gap-6 overflow-hidden">
+        
+        <!-- Sidebar: Intelligent Assistant -->
+        <div class="lg:w-80 flex flex-col gap-4 shrink-0 overflow-y-auto no-scrollbar">
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-blue-800 mb-3 flex items-center gap-2 border-b pb-2">
+                    <i class="fas fa-lightbulb text-amber-500"></i> المساعد الذكي
+                </h3>
+                <div id="ai-benefit" class="mb-4">
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase">لماذا نتعلم هذه المهارة؟</h4>
+                    <p id="benefit-text" class="text-xs text-slate-600 mt-1 leading-relaxed">يرجى اختيار تطبيق للبدء.</p>
+                </div>
+                <div id="ai-steps">
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase">خطوات الإنجاز:</h4>
+                    <div id="steps-list" class="mt-2 space-y-2 text-[11px]">
+                        <!-- Steps injected here -->
                     </div>
                 </div>
+            </div>
 
-                <!-- Editor Container -->
-                <div class="flex-1 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col min-h-[750px]">
-                    
-                    <!-- Ribbon Tabs -->
-                    <div class="bg-slate-100 flex text-[11px] font-bold border-b">
-                        <button onclick="switchApp('word')" id="tab-word" class="p-3 px-8 transition active-tab-indicator">Word</button>
-                        <button onclick="switchApp('excel')" id="tab-excel" class="p-3 px-8 transition opacity-50">Excel</button>
-                        <button onclick="switchApp('ppt')" id="tab-ppt" class="p-3 px-8 transition opacity-50">PowerPoint</button>
-                    </div>
-
-                    <!-- Ribbon Tools -->
-                    <div id="ribbon" class="h-24 bg-[#fbfbfb] border-b p-2 flex items-start overflow-x-auto gap-2 no-scrollbar">
-                        <!-- Injected ribbon tools -->
-                    </div>
-
-                    <!-- Simulator Viewport -->
-                    <div id="viewport" class="flex-1 bg-slate-200 p-4 md:p-8 overflow-auto">
-                        
-                        <!-- Word -->
-                        <div id="view-word" class="hidden">
-                            <div id="word-doc" class="word-page" contenteditable="true">
-                                <div id="toc-area" class="toc-box hidden">
-                                    <h3 class="font-bold border-b-2 border-slate-200 mb-3 text-lg">جدول المحتويات</h3>
-                                    <div id="toc-placeholder" class="text-sm italic text-slate-400">سيتم توليد الجدول...</div>
-                                </div>
-                                <h1 class="text-3xl font-bold mb-8 text-blue-900 border-b-2 border-blue-100 pb-2">رؤية المملكة 2030</h1>
-                                <p class="mb-6 leading-relaxed">تعتبر رؤية المملكة 2030 خطة طموحة تهدف إلى تحويل المملكة العربية السعودية إلى قوة استثمارية عالمية ومركز يربط بين القارات الثلاث.</p>
-                                <h2 class="text-xl font-bold mb-4">أهداف المجتمع الحيوي</h2>
-                                <p class="mb-4">تعتمد الرؤية على ثلاثة محاور أساسية:</p>
-                                <div id="w-list-target" class="mr-8 mb-8"></div>
-                                <div id="w-import-target" class="hidden mt-10 p-5 bg-purple-50 border-r-8 border-purple-500 rounded-lg">
-                                    <h3 class="font-bold text-purple-900 mb-2">محتوى مستورد (نيوم.docx):</h3>
-                                    <p class="text-sm italic">مشروع نيوم هو رؤية لمستقبل جديد في المملكة العربية السعودية.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Excel -->
-                        <div id="view-excel" class="hidden">
-                            <div class="bg-white p-6 rounded-2xl shadow-xl inline-block min-w-full">
-                                <div class="mb-3 flex justify-between text-[10px] text-slate-400 font-bold uppercase">
-                                    <span>انقري على أرقام الصفوف لاختيار عدة صفوف</span>
-                                    <span id="xl-sel-count">محدد: 0 صفوف</span>
-                                </div>
-                                <div id="xl-grid" class="excel-grid"></div>
-                            </div>
-                        </div>
-
-                        <!-- PowerPoint -->
-                        <div id="view-ppt" class="hidden">
-                            <div class="flex gap-6 h-full">
-                                <div class="w-48 flex flex-col gap-3 pr-2 border-l overflow-y-auto no-scrollbar">
-                                    <div class="ppt-slide p-2 text-[5px] border-4 border-blue-500 shadow-xl cursor-pointer">
-                                        <div class="font-bold border-b mb-1">مشروع نيوم - ذا لاين</div>
-                                        <p>مستقبل الحياة المتجددة</p>
-                                    </div>
-                                    <div class="ppt-slide p-2 text-[5px] opacity-40">الشريحة 2</div>
-                                    <div class="ppt-slide p-2 text-[5px] opacity-40">الشريحة 3</div>
-                                </div>
-                                <div class="flex-1 flex flex-col items-center justify-center">
-                                    <div id="ppt-slide-main" class="ppt-slide w-full max-w-2xl p-16 flex flex-col items-center justify-center text-center shadow-2xl">
-                                        <h1 class="text-4xl font-bold mb-6">ذا لاين THE LINE</h1>
-                                        <p class="text-xl text-slate-500">ثورة في الحياة الحضرية</p>
-                                        <div class="absolute bottom-6 right-6 text-[10px] opacity-40">مهارات تقنية متميزة</div>
-                                    </div>
-                                    <div id="ppt-master-tag" class="mt-4 bg-orange-600 text-white px-6 py-1.5 rounded-full text-xs font-bold hidden shadow-lg animate-pulse">
-                                        <i class="fas fa-eye ml-2"></i> وضع الشكل الرئيسي نَشِط
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+            <div class="bg-slate-900 text-white p-5 rounded-3xl shadow-xl">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-[10px] opacity-60 font-bold">مؤشر التقدم الكلي</span>
+                    <span id="perc-text" class="text-xs font-bold text-blue-400">0%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div id="perc-bar" class="bg-blue-500 h-full transition-all duration-700" style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Teacher View -->
-        <div id="view-teacher" class="hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">سجل إنجازات الطالبات</h2>
-                <button onclick="location.reload()" class="bg-slate-200 px-6 py-2 rounded-xl text-sm font-bold">خروج</button>
+        <!-- Editor Container -->
+        <div class="flex-1 bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200 flex flex-col">
+            
+            <!-- App Tabs -->
+            <div class="bg-slate-50 flex text-[12px] font-bold border-b">
+                <button onclick="switchApp('word')" id="tab-word" class="tab-btn p-4 px-10 transition active">Word</button>
+                <button onclick="switchApp('excel')" id="tab-excel" class="tab-btn p-4 px-10 transition opacity-50">Excel</button>
+                <button onclick="switchApp('ppt')" id="tab-ppt" class="tab-btn p-4 px-10 transition opacity-50">PowerPoint</button>
             </div>
-            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border">
-                <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-50 border-b">
-                        <tr>
-                            <th class="p-5">الاسم</th><th class="p-5 text-center">الصف</th><th class="p-5 text-center">الإنجاز</th><th class="p-5 text-center">W</th><th class="p-5 text-center">E</th><th class="p-5 text-center">P</th><th class="p-5">الوقت</th>
-                        </tr>
-                    </thead>
-                    <tbody id="teacher-table"></tbody>
-                </table>
-                <div id="no-data" class="p-20 text-center text-slate-400 font-bold hidden">لا يوجد بيانات</div>
+
+            <!-- Ribbon -->
+            <div id="ribbon" class="h-20 bg-[#f8fafc] border-b p-2 flex items-center overflow-x-auto gap-2">
+                <!-- Toolbar buttons injected based on current app -->
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 bg-slate-200 p-4 md:p-8 overflow-auto relative" id="editor-viewport">
+                
+                <!-- Word View -->
+                <div id="view-word" class="hidden">
+                    <div id="word-doc" class="word-document" contenteditable="true">
+                        <div id="toc-area" class="hidden mb-10 p-8 bg-slate-50 border-2 border-dashed rounded-2xl shadow-inner">
+                            <h2 class="font-bold border-b-2 mb-4 text-xl text-slate-800">فهرس المحتويات</h2>
+                            <div id="toc-list" class="space-y-2 text-sm italic text-slate-500"></div>
+                        </div>
+                        <h1 class="text-3xl font-bold text-blue-900 mb-6 border-b-4 border-blue-100 pb-2">رؤية المملكة العربية السعودية 2030</h1>
+                        <p class="mb-6 leading-relaxed">تعتبر رؤية المملكة 2030 خطة طموحة تهدف إلى تحويل المملكة العربية السعودية إلى قوة استثمارية عالمية ومركز يربط بين القارات الثلاث.</p>
+                        <h2 class="text-xl font-bold mb-4">أهداف المجتمع الحيوي</h2>
+                        <div id="w-list-placeholder"></div>
+                        <div id="w-import-placeholder" class="hidden mt-10 p-6 bg-purple-50 border-r-8 border-purple-500 rounded-xl shadow-sm">
+                            <strong class="text-purple-900 block mb-1">محتوى مستورد من ملف خارجي:</strong>
+                            <p class="text-sm italic">مشروع نيوم هو حجر الزاوية في الرؤية، يمثل المستقبل الجديد للحياة والعمل بذكاء.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Excel View -->
+                <div id="view-excel" class="hidden">
+                    <div class="bg-white p-6 rounded-2xl shadow-xl inline-block min-w-full relative">
+                        <div class="mb-3 flex justify-between text-[10px] text-slate-400 font-bold">
+                            <span>انقري على أرقام الصفوف لاختيار عدة صفوف للتنسيق الجماعي</span>
+                            <span id="xl-sel-count">محدد: 0 صفوف</span>
+                        </div>
+                        <div id="excel-grid" class="grid grid-cols-[45px_repeat(5,1fr)] bg-slate-300 gap-[1px] border border-slate-400">
+                            <!-- Excel Table Injected -->
+                        </div>
+                        <div id="input-msg-box" class="excel-input-msg hidden"></div>
+                    </div>
+                </div>
+
+                <!-- PowerPoint View -->
+                <div id="view-ppt" class="hidden h-full">
+                    <div class="flex flex-col md:flex-row gap-6 h-full">
+                        <!-- Slide Thumbnails -->
+                        <div class="w-full md:w-48 flex flex-row md:flex-col gap-3 overflow-auto no-scrollbar shrink-0">
+                            <div class="aspect-video bg-white border-4 border-blue-500 p-2 text-[5px] shadow-lg rounded-lg cursor-pointer" id="thumb-1">
+                                <div class="font-bold border-b mb-1">الشريحة الرئيسية</div>
+                                <p>مشروع نيوم</p>
+                            </div>
+                            <div class="aspect-video bg-white opacity-40 p-2 text-[5px] rounded-lg border border-slate-300">الشريحة 2</div>
+                            <div class="aspect-video bg-white opacity-40 p-2 text-[5px] rounded-lg border border-slate-300">الشريحة 3</div>
+                        </div>
+                        <!-- Main Stage -->
+                        <div class="flex-1 flex flex-col items-center justify-center">
+                            <div id="ppt-slide" class="aspect-video w-full max-w-2xl bg-white shadow-2xl p-12 flex flex-col items-center justify-center text-center transition-all duration-500 rounded-xl relative overflow-hidden theme-default">
+                                <div id="ppt-title" class="ppt-slide-editable text-4xl font-bold mb-4 w-full" contenteditable="true">أدخلي عنوان العرض هنا</div>
+                                <div id="ppt-body" class="ppt-slide-editable text-xl opacity-70 w-full" contenteditable="true">انقري هنا لإضافة نص فرعي أو محتوى</div>
+                                <div class="absolute bottom-6 right-8 text-[10px] opacity-40 font-bold">الشريحة رقم 1</div>
+                            </div>
+                            <div id="master-badge" class="mt-4 bg-amber-500 text-white px-6 py-1.5 rounded-full text-xs font-bold hidden animate-pulse shadow-lg border-2 border-white">
+                                <i class="fas fa-crown ml-2"></i> نمط "الشريحة الرئيسية" نَشِط
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </main>
 
-    <!-- Modals -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[200] hidden items-center justify-center p-4 backdrop-blur-sm">
-        <div id="dlg-val" class="bg-white rounded-3xl p-8 w-full max-w-sm hidden"><h3 class="font-bold text-lg mb-4 text-green-700">التحقق من البيانات</h3><select id="xl-val-type" class="w-full p-3 border rounded-xl" onchange="document.getElementById('xl-val-src-box').classList.toggle('hidden', this.value!='list')"><option value="any">أي قيمة</option><option value="list">قائمة</option></select><div id="xl-val-src-box" class="hidden mt-3"><input type="text" id="xl-val-src" placeholder="ممتاز,جيد,مقبول" class="w-full p-3 border rounded-xl text-sm"></div><div class="flex justify-end gap-2 pt-4"><button onclick="closeModals()">إلغاء</button><button onclick="applyXlValidation()" class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold">تطبيق</button></div></div>
-        <div id="dlg-trans" class="bg-white rounded-3xl p-8 w-full max-w-md hidden"><h3 class="font-bold text-lg mb-4 text-blue-700">الترجمة</h3><div id="trans-preview" class="p-4 bg-blue-50 border rounded-xl text-xs mb-4"></div><div class="grid grid-cols-2 gap-3"><button onclick="doTranslate('sel')" class="bg-blue-600 text-white py-4 rounded-2xl font-bold">ترجمة المحدد</button><button onclick="doTranslate('all')" class="bg-slate-800 text-white py-4 rounded-2xl font-bold">ترجمة المستند</button></div></div>
-        <div id="dlg-teacher" class="bg-white rounded-3xl p-10 w-full max-w-sm hidden text-center"><h3 class="font-bold text-xl mb-6">دخول المعلمة</h3><input type="password" id="teacher-pass" placeholder="كلمة المرور..." class="w-full p-4 border rounded-2xl text-center mb-6"><button onclick="handleTeacherLogin()" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold">دخول</button><p id="teacher-err" class="text-red-500 text-xs mt-3 hidden">خطأ في كلمة المرور</p></div>
+    <!-- Data Validation Dialog (Excel) -->
+    <div id="dialog-overlay" class="fixed inset-0 bg-black/60 z-[3000] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div id="dlg-validation" class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden hidden animate-in zoom-in duration-200">
+            <div class="bg-slate-100 p-3 flex text-[10px] font-bold border-b gap-4">
+                <button onclick="switchDlgTab('settings')" id="dt-settings" class="dialog-tab active px-3 pb-1">إعدادات</button>
+                <button onclick="switchDlgTab('input')" id="dt-input" class="dialog-tab px-3 pb-1">رسالة إدخل</button>
+                <button onclick="switchDlgTab('error')" id="dt-error" class="dialog-tab px-3 pb-1">تنبيه إلى الخطأ</button>
+            </div>
+            
+            <div class="p-6">
+                <!-- Tab: Settings -->
+                <div id="tab-v-settings" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">السماح بـ:</label>
+                        <select id="v-type" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 ring-blue-500" onchange="toggleVSource(this.value)">
+                            <option value="any">أي قيمة</option>
+                            <option value="list">قائمة</option>
+                            <option value="whole">عدد صحيح</option>
+                            <option value="date">تاريخ</option>
+                        </select>
+                    </div>
+                    <div id="v-source-box" class="hidden">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">المصدر (افصلي بفاصلة):</label>
+                        <input type="text" id="v-source" placeholder="ممتاز, جيد, مقبول" class="w-full p-2 border rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <!-- Tab: Input Message -->
+                <div id="tab-v-input" class="hidden space-y-4">
+                    <p class="text-[10px] text-slate-400">هذه الرسالة تظهر للطالبة بمجرد الوقوف على الخلية.</p>
+                    <input type="text" id="v-in-title" placeholder="عنوان التوجيه" class="w-full p-2 border rounded-lg text-sm">
+                    <textarea id="v-in-body" placeholder="اكتبي تعليمات الإدخال هنا..." class="w-full p-2 border rounded-lg text-sm h-20"></textarea>
+                </div>
+
+                <!-- Tab: Error Alert -->
+                <div id="tab-v-error" class="hidden space-y-4">
+                    <p class="text-[10px] text-slate-400">تظهر عند إدخال قيمة لا تطابق الشروط.</p>
+                    <input type="text" id="v-err-title" placeholder="عنوان رسالة الخطأ" class="w-full p-2 border rounded-lg text-sm">
+                    <textarea id="v-err-body" placeholder="اكتبي رسالة التنبيه هنا..." class="w-full p-2 border rounded-lg text-sm h-20"></textarea>
+                </div>
+
+                <div class="mt-8 flex justify-end gap-2">
+                    <button onclick="closeDialogs()" class="px-4 py-2 text-sm text-slate-400 font-bold">إلغاء</button>
+                    <button onclick="applyValidation()" class="bg-blue-600 text-white px-8 py-2 rounded-xl font-bold shadow-lg shadow-blue-200">موافق</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-3 rounded-full shadow-2xl transition-all duration-500 opacity-0 -translate-y-10 z-[300]"><span id="toast-msg"></span></div>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-3 rounded-full shadow-2xl transition-all duration-500 opacity-0 -translate-y-10 z-[4000]">
+        <span id="toast-msg"></span>
+    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    <script>
+        // --- System State ---
+        let student = { name: "", class: "", skills: {} };
+        let currentApp = 'word';
+        let selectedRows = new Set();
+        let validationRules = {}; // Stores (r-c) -> {title, body, errorTitle, errorBody, list}
 
-        let firebaseConfig = {};
-        try {
-            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        } catch (e) { console.warn("Firebase config missing."); }
-        
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'advanced-sim-v4-final';
-        let app, auth, db, isFirebaseInit = false;
-
-        if (firebaseConfig && firebaseConfig.apiKey) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            isFirebaseInit = true;
-        }
-
-        let user = null, isAuthReady = false, currentApp = 'word';
-        let studentData = { name: "", class: "", skills: { w_style: false, w_toc: false, w_list: false, w_import: false, w_translate: false, e_val: false, e_freeze: false, e_link: false, e_protect: false, p_master: false, p_export: false } };
-        const totalSkills = 11;
-
-        async function init() {
-            if (!isFirebaseInit) { isAuthReady = true; return; }
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-                else await signInAnonymously(auth);
-            } catch (e) { isAuthReady = true; }
-        }
-
-        if (isFirebaseInit) { onAuthStateChanged(auth, u => { user = u; isAuthReady = true; }); }
-
-        window.startTraining = async () => {
-            const name = document.getElementById('login-name').value.trim();
-            const cls = document.getElementById('login-class').value;
-            if (name.length < 8) return showToast("يرجى إدخال اسمكِ الثلاثي.");
-            if (!isAuthReady) return showToast("جاري التهيئة...");
-
-            studentData.name = name; studentData.class = cls;
-            document.getElementById('view-login').classList.add('hidden');
-            document.getElementById('view-main').classList.remove('hidden');
-            document.getElementById('user-info').classList.remove('hidden');
-            document.getElementById('user-name-tag').innerText = name;
+        // --- Core Entry Logic ---
+        function startSimulation() {
+            const nameInput = document.getElementById('st-name').value.trim();
+            if (nameInput.length < 8) {
+                showToast("يرجى إدخال اسمكِ الثلاثي بشكل كامل.");
+                return;
+            }
+            student.name = nameInput;
+            student.class = document.getElementById('st-class').value;
+            
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('display-name').innerText = student.name;
+            document.getElementById('display-class').innerText = student.class;
             
             initExcelGrid();
-            window.switchApp('word');
-            await saveProgress();
-        };
-
-        async function saveProgress() {
-            updateProgressUI();
-            if (!isFirebaseInit || !user) return;
-            try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', user.uid), { ...studentData, timestamp: serverTimestamp() }, { merge: true }); } catch (e) {}
+            switchApp('word');
         }
 
-        function updateProgressUI() {
-            const done = Object.values(studentData.skills).filter(v => v).length;
-            const perc = Math.round((done / totalSkills) * 100);
-            document.getElementById('mastery-perc').innerText = perc + "%";
-            document.getElementById('mastery-bar').style.width = perc + "%";
-            document.getElementById('mastery-label').innerText = perc >= 100 ? "متقنة" : (perc > 50 ? "متقدمة" : "متدربة");
-            loadSkillsSidebar(currentApp);
-        }
-
-        window.switchApp = (app) => {
+        // --- Navigation & App Switching ---
+        function switchApp(app) {
             currentApp = app;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.add('opacity-50');
+                b.classList.remove('active');
+            });
+            document.getElementById(`tab-${app}`).classList.remove('opacity-50');
+            document.getElementById(`tab-${app}`).classList.add('active');
+
             document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
             document.getElementById(`view-${app}`).classList.remove('hidden');
-            document.querySelectorAll('[id^="tab-"]').forEach(t => t.classList.add('opacity-50'));
-            document.getElementById(`tab-${app}`).classList.remove('opacity-50');
-            document.getElementById(`tab-${app}`).classList.add('active-tab-indicator', 'opacity-100');
+
             renderRibbon(app);
-            loadSkillsSidebar(app);
-        };
-
-        const ribbons = {
-            word: `<div class="ribbon-group"><button onclick="doWStyle()" class="ribbon-btn"><i class="fas fa-heading"></i><span>العنوان 1</span></button><button onclick="doWList()" class="ribbon-btn"><i class="fas fa-list-ol"></i><span>قائمة أهداف</span></button><span class="text-[8px] text-gray-400 mt-auto">الرئيسية</span></div><div class="ribbon-group"><button onclick="doWImport()" class="ribbon-btn"><i class="fas fa-file-import text-purple-600"></i><span>استيراد</span></button><span class="text-[8px] text-gray-400 mt-auto">إدراج</span></div><div class="ribbon-group"><button onclick="doWToc()" class="ribbon-btn"><i class="fas fa-table-list text-blue-600"></i><span>جدول محتويات</span></button><span class="text-[8px] text-gray-400 mt-auto">مراجع</span></div><div class="ribbon-group"><button onclick="openTrans()" class="ribbon-btn"><i class="fas fa-language text-blue-500"></i><span>الترجمة</span></button><span class="text-[8px] text-gray-400 mt-auto">مراجعة</span></div>`,
-            excel: `<div class="ribbon-group"><button onclick="openXlVal()" class="ribbon-btn"><i class="fas fa-check-double text-green-700"></i><span>تحقق البيانات</span></button><button onclick="doXlProtect()" class="ribbon-btn"><i class="fas fa-shield-alt"></i><span>حماية الورقة</span></button><span class="text-[8px] text-gray-400 mt-auto">بيانات</span></div><div class="ribbon-group"><button onclick="doXlFreeze()" class="ribbon-btn"><i class="fas fa-snowflake text-blue-400"></i><span>تجميد الأجزاء</span></button><button onclick="doXlLink()" class="ribbon-btn"><i class="fas fa-link"></i><span>بيانات مرتبطة</span></button><span class="text-[8px] text-gray-400 mt-auto">عرض</span></div>`,
-            ppt: `<div class="ribbon-group"><button onclick="doPMaster()" class="ribbon-btn"><i class="fas fa-clone text-orange-600"></i><span>الشكل الرئيسي</span></button><span class="text-[8px] text-gray-400 mt-auto">عرض</span></div><div class="ribbon-group"><button onclick="doPExport()" class="ribbon-btn"><i class="fas fa-file-export"></i><span>تصدير الحزمة</span></button><span class="text-[8px] text-gray-400 mt-auto">ملف</span></div>`
-        };
-
-        function renderRibbon(app) { document.getElementById('ribbon').innerHTML = ribbons[app]; }
-
-        const skillMap = {
-            word: [{id: 'w_style', text: "تنسيق العناوين (العنوان 1)"},{id: 'w_list', text: "إنشاء قائمة متعددة المستويات"},{id: 'w_import', text: "استيراد محتوى خارجي"},{id: 'w_translate', text: "ترجمة النص أو المستند"},{id: 'w_toc', text: "إدراج جدول محتويات"}],
-            excel: [{id: 'e_val', text: "التحقق من صحة البيانات"},{id: 'e_freeze', text: "تجميد الصفوف"},{id: 'e_link', text: "تحويل النص لبيانات مرتبطة"},{id: 'e_protect', text: "حماية وتأمين الورقة"}],
-            ppt: [{id: 'p_master', text: "تطبيق الشكل الرئيسي"},{id: 'p_export', text: "تصدير العرض كحزمة"}]
-        };
-
-        function loadSkillsSidebar(app) {
-            const list = document.getElementById('skills-list');
-            if (!list) return;
-            list.innerHTML = skillMap[app].map(s => `<div class="sidebar-step p-3 text-[11px] flex items-center gap-2 ${studentData.skills[s.id] ? 'completed' : 'active'}"><i class="fas ${studentData.skills[s.id] ? 'fa-check-circle text-green-600' : 'fa-circle text-slate-200'}"></i><span>${s.text}</span></div>`).join('');
+            updateAssistant(app);
         }
 
-        window.doWStyle = () => { const sel = window.getSelection(); if (sel.rangeCount && sel.toString().length > 2) { document.execCommand('formatBlock', false, 'H2'); const el = sel.getRangeAt(0).commonAncestorContainer.parentElement; el.style.color = "#1e3a8a"; el.style.borderRight = "5px solid #1e3a8a"; el.style.paddingRight = "10px"; studentData.skills.w_style = true; showToast("تم تطبيق النمط!"); saveProgress(); } else { showToast("ظللي عنواناً أولاً."); } };
-        window.doWList = () => { document.getElementById('w-list-target').innerHTML = `<ol class="list-decimal space-y-2"><li class="font-bold">المجتمع الحيوي<ul class="list-disc mr-6 mt-1 text-slate-600"><li>تعزيز القيم الإسلامية</li><li>تمكين حياة صحية</li></ul></li><li class="font-bold">الاقتصاد المزدهر<ul class="list-disc mr-6 mt-1 text-slate-600"><li>تنوع الاقتصاد</li><li>زيادة التوظيف</li></ul></li></ol>`; studentData.skills.w_list = true; showToast("تم إنشاء القائمة."); saveProgress(); };
-        window.doWImport = () => { showToast("جاري استيراد..."); setTimeout(() => { document.getElementById('w-import-target').classList.remove('hidden'); studentData.skills.w_import = true; saveProgress(); }, 1000); };
-        window.openTrans = () => { const sel = window.getSelection().toString(); document.getElementById('trans-preview').innerText = sel ? sel : "[المستند كاملاً]"; document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden')); document.getElementById('dlg-trans').classList.remove('hidden'); };
-        window.doTranslate = (mode) => { showToast("جاري الترجمة..."); setTimeout(() => { if (mode === 'all') { document.getElementById('word-doc').innerHTML = `<h1 class='text-3xl font-bold mb-4'>Saudi Vision 2030</h1><p>Strategic framework for diversification.</p>`; } studentData.skills.w_translate = true; showToast("تمت الترجمة."); window.closeModals(); saveProgress(); }, 1000); };
-        window.doWToc = () => { if (!studentData.skills.w_style) return showToast("طبقي الأنماط أولاً!"); document.getElementById('toc-area').classList.remove('hidden'); document.getElementById('toc-placeholder').innerHTML = `<div class="flex justify-between border-b border-dotted py-1"><span>رؤية المملكة 2030</span><span>1</span></div><div class="flex justify-between border-b border-dotted py-1"><span>أهداف المجتمع الحيوي</span><span>2</span></div>`; studentData.skills.w_toc = true; showToast("تم إدراج الجدول."); saveProgress(); };
+        const appDetails = {
+            word: {
+                benefit: "جدول المحتويات والأنماط تجعل البحوث والتقارير منظمة واحترافية، وتسهل الوصول السريع للمعلومات.",
+                steps: [
+                    { id: 'w1', text: "ظللي العناوين ثم طبقي نمط (العنوان 1) للتعريف بها." },
+                    { id: 'w2', text: "أنشئي قائمة أهداف متعددة المستويات لتنظيم النقاط." },
+                    { id: 'w3', text: "استخدمي أداة (استيراد) لإحضار معلومات عن نيوم." },
+                    { id: 'w4', text: "أدرجي جدول المحتويات لمشاهدة الفهرس التلقائي." }
+                ],
+                ribbon: `
+                    <button onclick="doWStyle()" class="office-btn"><i class="fas fa-heading text-blue-600"></i><span>العنوان 1</span></button>
+                    <button onclick="doWList()" class="office-btn"><i class="fas fa-list-ol text-blue-600"></i><span>قائمة</span></button>
+                    <div class="h-10 w-px bg-slate-200 mx-2"></div>
+                    <button onclick="doWImport()" class="office-btn"><i class="fas fa-file-import text-purple-600"></i><span>استيراد</span></button>
+                    <button onclick="doWToc()" class="office-btn"><i class="fas fa-table-list text-blue-800"></i><span>فهرس</span></button>
+                    <button onclick="doWTrans()" class="office-btn"><i class="fas fa-language text-blue-400"></i><span>ترجمة</span></button>
+                `
+            },
+            excel: {
+                benefit: "التحقق من صحة البيانات يمنع الأخطاء البشرية أثناء الإدخال، ويضمن بقاء البيانات دقيقة وموحدة.",
+                steps: [
+                    { id: 'e1', text: "حددي عدة صفوف بالنقر على أرقامها في الجانب." },
+                    { id: 'e2', text: "افتحي (التحقق من الصحة) واختاري نوع (قائمة)." },
+                    { id: 'e3', text: "اكتبي (رسالة إدخال) لتوجيه من يستخدم الجدول." },
+                    { id: 'e4', text: "اكتبي (تنبيه خطأ) ليظهر عند كتابة معلومة خاطئة." }
+                ],
+                ribbon: `
+                    <button onclick="openXlValDialog()" class="office-btn"><i class="fas fa-check-double text-green-600"></i><span>تحقق الصحة</span></button>
+                    <button onclick="doXlFreeze()" class="office-btn"><i class="fas fa-snowflake text-blue-500"></i><span>تجميد</span></button>
+                    <button onclick="doXlLink()" class="office-btn"><i class="fas fa-link text-blue-700"></i><span>ربط بيانات</span></button>
+                    <button onclick="doXlProtect()" class="office-btn"><i class="fas fa-shield-alt text-green-700"></i><span>حماية</span></button>
+                `
+            },
+            ppt: {
+                benefit: "الشريحة الرئيسية (Slide Master) تضمن توحيد الخطوط والشعارات والألوان في كل الشرائح بلمسة واحدة.",
+                steps: [
+                    { id: 'p1', text: "انقري على (الشريحة الرئيسية) لتصميم القالب العام." },
+                    { id: 'p2', text: "اكتبي عنوان العرض في المكان المخصص." },
+                    { id: 'p3', text: "اختاري (تطبيق تنسيق) لمشاهدة التغيير على كل العرض." },
+                    { id: 'p4', text: "صدّري العرض كحزمة عند الانتهاء." }
+                ],
+                ribbon: `
+                    <button onclick="toggleMasterMode()" class="office-btn"><i class="fas fa-crown text-amber-500"></i><span>شريحة رئيسية</span></button>
+                    <button onclick="applyPPTTheme('neom')" class="office-btn"><i class="fas fa-palette text-green-700"></i><span>تنسيق نيوم</span></button>
+                    <button onclick="applyPPTTheme('vision')" class="office-btn"><i class="fas fa-palette text-blue-800"></i><span>تنسيق الرؤية</span></button>
+                    <div class="h-10 w-px bg-slate-200 mx-1"></div>
+                    <button onclick="doPExport()" class="office-btn"><i class="fas fa-file-export text-slate-500"></i><span>تصدير</span></button>
+                `
+            }
+        };
 
-        window.selectedRows = new Set();
+        function renderRibbon(app) { document.getElementById('ribbon').innerHTML = appDetails[app].ribbon; }
+
+        function updateAssistant(app) {
+            document.getElementById('benefit-text').innerText = appDetails[app].benefit;
+            document.getElementById('steps-list').innerHTML = appDetails[app].steps.map(s => `
+                <div class="flex items-center gap-2 p-2 rounded-xl border border-slate-100 ${student.skills[s.id] ? 'bg-green-50 opacity-60' : 'bg-slate-50'}">
+                    <i class="fas ${student.skills[s.id] ? 'fa-check-circle text-green-500' : 'fa-circle text-slate-300'}"></i>
+                    <span class="${student.skills[s.id] ? 'line-through' : ''}">${s.text}</span>
+                </div>
+            `).join('');
+            updateGlobalProg();
+        }
+
+        function updateGlobalProg() {
+            const total = 12; 
+            const done = Object.values(student.skills).filter(v => v === true).length;
+            const perc = Math.round((done / total) * 100);
+            document.getElementById('perc-text').innerText = perc + "%";
+            document.getElementById('perc-bar').style.width = perc + "%";
+        }
+
+        // --- WORD FUNCTIONS ---
+        function doWStyle() {
+            const sel = window.getSelection();
+            if (sel.rangeCount && sel.toString().length > 2) {
+                document.execCommand('formatBlock', false, 'H2');
+                const el = sel.getRangeAt(0).commonAncestorContainer.parentElement;
+                el.style.color = "#1e3a8a";
+                el.style.borderRight = "6px solid #2563eb";
+                el.style.paddingRight = "15px";
+                student.skills.w1 = true;
+                showToast("تم تطبيق نمط العنوان بنجاح.");
+                updateAssistant('word');
+            } else { showToast("ظللي أحد العناوين أولاً."); }
+        }
+
+        function doWList() {
+            document.getElementById('w-list-placeholder').innerHTML = `
+                <ol class="list-decimal space-y-2 font-bold mt-4">
+                    <li>المجتمع الحيوي
+                        <ul class="list-disc mr-6 mt-1 text-slate-600 font-normal">
+                            <li>تعزيز القيم الإسلامية</li>
+                            <li>تمكين حياة عامرة وصحية</li>
+                        </ul>
+                    </li>
+                    <li>الاقتصاد المزدهر
+                        <ul class="list-disc mr-6 mt-1 text-slate-600 font-normal">
+                            <li>تنمية وتنويع الاقتصاد</li>
+                            <li>زيادة معدلات التوظيف</li>
+                        </ul>
+                    </li>
+                </ol>
+            `;
+            student.skills.w2 = true;
+            updateAssistant('word');
+        }
+
+        function doWImport() {
+            showToast("جاري البحث عن ملفات...");
+            setTimeout(() => {
+                document.getElementById('w-import-placeholder').classList.remove('hidden');
+                student.skills.w3 = true;
+                updateAssistant('word');
+            }, 800);
+        }
+
+        function doWToc() {
+            if (!student.skills.w1) return showToast("يجب تطبيق الأنماط أولاً لتوليد الفهرس!");
+            document.getElementById('toc-area').classList.remove('hidden');
+            document.getElementById('toc-list').innerHTML = `
+                <div class="flex justify-between border-b border-dotted py-2"><span>رؤية المملكة 2030</span><span>صفحة 1</span></div>
+                <div class="flex justify-between border-b border-dotted py-2"><span>أهداف المجتمع الحيوي</span><span>صفحة 2</span></div>
+            `;
+            student.skills.w4 = true;
+            updateAssistant('word');
+        }
+
+        function doWTrans() {
+            showToast("جاري الترجمة...");
+            setTimeout(() => {
+                document.getElementById('word-doc').innerHTML = `<h1 class='text-3xl font-bold mb-4'>Saudi Vision 2030</h1><p>A strategic framework to reduce dependence on oil and develop public service sectors.</p>`;
+            }, 1000);
+        }
+
+        // --- EXCEL FUNCTIONS ---
         function initExcelGrid() {
-            const grid = document.getElementById('xl-grid'); if (!grid) return;
-            grid.innerHTML = `<div class="excel-cell excel-header">#</div>` + ['A','B','C','D','E','F'].map(l => `<div class="excel-cell excel-header">${l}</div>`).join('');
-            const r1 = ['المنطقة', 'التقدير', 'المهارة', 'النسبة', 'التاريخ', 'الحالة'];
-            grid.innerHTML += `<div class="excel-cell excel-header frozen-row" onclick="window.selectRow(1)">1</div>` + r1.map(t => `<div class="excel-cell excel-header frozen-row">${t}</div>`).join('');
-            for (let i = 2; i <= 10; i++) { grid.innerHTML += `<div class="excel-cell excel-header" onclick="window.selectRow(${i})">${i}</div>`; for (let j = 0; j < 6; j++) { grid.innerHTML += `<div contenteditable="true" class="excel-cell border" id="xl-${i}-${j}"></div>`; } }
-            document.getElementById('xl-2-0').innerText = "الرياض"; document.getElementById('xl-3-0').innerText = "مكة المكرمة";
+            const grid = document.getElementById('excel-grid');
+            grid.innerHTML = `<div class='excel-cell bg-slate-100 font-bold justify-center'>#</div>` + ['A','B','C','D','E'].map(l => `<div class='excel-cell bg-slate-100 font-bold justify-center'>${l}</div>`).join('');
+            for (let i = 1; i <= 10; i++) {
+                grid.innerHTML += `<div class='excel-cell bg-slate-50 font-bold cursor-pointer justify-center hover:bg-blue-100' onclick='selXlRow(${i})'>${i}</div>`;
+                for (let j = 0; j < 5; j++) {
+                    grid.innerHTML += `<div contenteditable='true' class='excel-cell' id='xc-${i}-${j}' onfocus='xlOnFocus(${i},${j})' onblur='xlOnBlur(${i},${j})'></div>`;
+                }
+            }
+            document.getElementById('xc-1-0').innerText = "المنطقة";
+            document.getElementById('xc-1-1').innerText = "التقدير";
+            document.getElementById('xc-2-0').innerText = "الرياض";
         }
-        window.selectRow = (row) => { if (row === 1) return; const cells = document.querySelectorAll(`[id^="xl-${row}-"]`); if (window.selectedRows.has(row)) { window.selectedRows.delete(row); cells.forEach(c => c.classList.remove('selected')); } else { window.selectedRows.add(row); cells.forEach(c => c.classList.add('selected')); } document.getElementById('xl-sel-count').innerText = `محدد: ${window.selectedRows.size} صفوف`; };
-        window.openXlVal = () => { if (window.selectedRows.size === 0) return showToast("حددي صَفاً أولاً."); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden')); document.getElementById('dlg-val').classList.remove('hidden'); };
-        window.applyXlValidation = () => { const src = document.getElementById('xl-val-src').value; if (src.length > 3) { window.selectedRows.forEach(row => { const cell = document.getElementById(`xl-${row}-1`); if (cell) cell.innerHTML = `<select class="w-full bg-transparent outline-none">${src.split(',').map(s => `<option>${s.trim()}</option>`).join('')}</select>`; }); studentData.skills.e_val = true; window.closeModals(); saveProgress(); } else { showToast("أدخلي المصدر!"); } };
-        window.doXlFreeze = () => { document.querySelectorAll('.frozen-row').forEach(h => h.style.background = "#dcfce7"); studentData.skills.e_freeze = true; showToast("تم تجميد الصف."); saveProgress(); };
-        window.doXlLink = () => { if (window.selectedRows.size === 0) return showToast("حددي صَفاً أولاً."); window.selectedRows.forEach(row => { const cell = document.getElementById(`xl-${row}-0`); if (cell) { cell.classList.add('text-blue-600', 'underline'); if (!cell.innerHTML.includes('fa-info-circle')) cell.innerHTML += ' <i class="fas fa-info-circle text-[8px]"></i>'; } }); studentData.skills.e_link = true; showToast("تم ربط البيانات."); saveProgress(); };
-        window.doXlProtect = () => { studentData.skills.e_protect = true; showToast("تمت حماية الورقة."); saveProgress(); };
 
-        window.doPMaster = () => { const main = document.getElementById('ppt-slide-main'); const tag = document.getElementById('ppt-master-tag'); if (main) { const active = main.classList.toggle('master-active'); if (tag) tag.classList.toggle('hidden', !active); if (active) { studentData.skills.p_master = true; showToast("وضع الشكل الرئيسي نَشِط."); saveProgress(); } } };
-        window.doPExport = () => { showToast("جاري التصدير..."); setTimeout(() => { studentData.skills.p_export = true; showToast("تم التصدير."); saveProgress(); }, 1000); };
+        function selXlRow(r) {
+            const cells = document.querySelectorAll(`[id^="xc-${r}-"]`);
+            if (selectedRows.has(r)) {
+                selectedRows.delete(r);
+                cells.forEach(c => c.classList.remove('selected-row'));
+            } else {
+                selectedRows.add(r);
+                cells.forEach(c => c.classList.add('selected-row'));
+            }
+            document.getElementById('xl-sel-count').innerText = `محدد: ${selectedRows.size} صفوف`;
+        }
 
-        window.openTeacherAuth = () => { document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden')); document.getElementById('dlg-teacher').classList.remove('hidden'); };
-        window.handleTeacherLogin = () => { if (document.getElementById('teacher-pass').value === "abeer2026") { window.closeModals(); loadTeacherData(); } else { document.getElementById('teacher-err').classList.remove('hidden'); } };
+        function openXlValDialog() {
+            if (selectedRows.size === 0) return showToast("حددي صَفاً أولاً بالضغط على رقمه.");
+            document.getElementById('dialog-overlay').classList.replace('hidden', 'flex');
+            document.getElementById('dlg-validation').classList.remove('hidden');
+        }
 
-        function loadTeacherData() {
-            document.getElementById('view-login').classList.add('hidden'); document.getElementById('view-main').classList.add('hidden'); document.getElementById('view-teacher').classList.remove('hidden');
-            if (!isFirebaseInit) return;
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => {
-                const tbody = document.getElementById('teacher-table'); if (!tbody) return;
-                tbody.innerHTML = ''; document.getElementById('no-data').classList.toggle('hidden', !snap.empty);
-                snap.forEach(d => {
-                    const data = d.data(); const done = Object.values(data.skills || {}).filter(v => v).length; const perc = Math.round((done / totalSkills) * 100);
-                    tbody.innerHTML += `<tr class="border-b hover:bg-slate-50 transition"><td class="p-5 font-bold">${data.name}</td><td class="p-5 text-center"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px]">${data.class}</span></td><td class="p-5"><div class="flex items-center gap-2"><div class="flex-1 bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-green-500 h-full" style="width: ${perc}%"></div></div><span class="text-[10px] font-bold">${perc}%</span></div></td><td class="p-5 text-center">${data.skills?.w_toc ? '✅' : '❌'}</td><td class="p-5 text-center">${data.skills?.e_val ? '✅' : '❌'}</td><td class="p-5 text-center">${data.skills?.p_master ? '✅' : '❌'}</td><td class="p-5 text-[10px] text-slate-400">${data.timestamp?.toDate().toLocaleString('ar-SA') || '--'}</td></tr>`;
-                });
+        function switchDlgTab(tab) {
+            document.querySelectorAll('.dialog-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`dt-${tab}`).classList.add('active');
+            document.querySelectorAll('[id^="tab-v-"]').forEach(v => v.classList.add('hidden'));
+            document.getElementById(`tab-v-${tab}`).classList.remove('hidden');
+        }
+
+        function toggleVSource(v) { document.getElementById('v-source-box').classList.toggle('hidden', v !== 'list'); }
+
+        function applyValidation() {
+            const type = document.getElementById('v-type').value;
+            const src = document.getElementById('v-source').value;
+            const inTitle = document.getElementById('v-in-title').value;
+            const inBody = document.getElementById('v-in-body').value;
+            const errTitle = document.getElementById('v-err-title').value;
+            const errBody = document.getElementById('v-err-body').value;
+
+            selectedRows.forEach(row => {
+                const target = document.getElementById(`xc-${row}-1`);
+                if (type === 'list' && src.length > 2) {
+                    target.innerHTML = `<select class='w-full bg-transparent outline-none'>${src.split(',').map(s => `<option>${s.trim()}</option>`).join('')}</select>`;
+                }
+                validationRules[`${row}-1`] = { title: inTitle, body: inBody, errTitle: errTitle, errBody: errBody };
             });
+
+            student.skills.e1 = true;
+            student.skills.e2 = true;
+            student.skills.e3 = true;
+            student.skills.e4 = true;
+            closeDialogs();
+            updateAssistant('excel');
+            showToast("تم تطبيق قاعدة التحقق بنجاح!");
         }
 
-        window.closeModals = () => { document.getElementById('modal-overlay').classList.replace('flex', 'hidden'); };
-        function showToast(msg) { const t = document.getElementById('toast'); const msgEl = document.getElementById('toast-msg'); if (t && msgEl) { msgEl.innerText = msg; t.style.opacity = "1"; t.style.transform = "translateY(0)"; setTimeout(() => { t.style.opacity = "0"; t.style.transform = "translateY(-10px)"; }, 3000); } }
+        function xlOnFocus(r, c) {
+            const rule = validationRules[`${r}-${c}`];
+            if (rule && rule.body) {
+                const box = document.getElementById('input-msg-box');
+                const cell = document.getElementById(`xc-${r}-${c}`);
+                const rect = cell.getBoundingClientRect();
+                box.style.left = (rect.right + 8) + "px";
+                box.style.top = rect.top + "px";
+                box.innerHTML = `<div class='font-bold mb-1'>${rule.title}</div>${rule.body}`;
+                box.classList.remove('hidden');
+            }
+        }
 
-        init();
+        function xlOnBlur(r, c) { document.getElementById('input-msg-box').classList.add('hidden'); }
+
+        function doXlFreeze() {
+            document.querySelectorAll('.excel-cell').forEach(c => { if(c.innerText === "المنطقة" || c.innerText === "التقدير") c.style.background = "#dcfce7"; });
+            showToast("تم تجميد الصف العلوي لسهولة القراءة.");
+        }
+        function doXlProtect() { showToast("تم تأمين ورقة العمل بكلمة مرور."); }
+        function doXlLink() { showToast("تم ربط البيانات بمصادر خارجية."); }
+
+        // --- PPT FUNCTIONS ---
+        function toggleMasterMode() {
+            const badge = document.getElementById('master-badge');
+            const slide = document.getElementById('ppt-slide');
+            const isActive = badge.classList.toggle('hidden');
+            if (!isActive) {
+                slide.classList.add('ring-4', 'ring-amber-400');
+                showToast("أنتِ الآن في وضع الشريحة الرئيسية لتصميم القالب.");
+                student.skills.p1 = true;
+                updateAssistant('ppt');
+            } else {
+                slide.classList.remove('ring-4', 'ring-amber-400');
+            }
+        }
+
+        function applyPPTTheme(theme) {
+            const slide = document.getElementById('ppt-slide');
+            const thumb = document.getElementById('thumb-1');
+            slide.classList.remove('theme-default', 'theme-neom', 'theme-vision');
+            thumb.classList.remove('theme-neom', 'theme-vision');
+            
+            if (theme === 'neom') {
+                slide.classList.add('theme-neom');
+                thumb.classList.add('theme-neom');
+                showToast("تم تطبيق تنسيق مشروع نيوم على كل العرض.");
+            } else {
+                slide.classList.add('theme-vision');
+                thumb.classList.add('theme-vision');
+                showToast("تم تطبيق تنسيق رؤية 2030.");
+            }
+            student.skills.p3 = true;
+            updateAssistant('ppt');
+        }
+
+        function doPExport() {
+            showToast("جاري تصدير العرض كحزمة ملفات...");
+            student.skills.p4 = true;
+            updateAssistant('ppt');
+        }
+
+        // --- HELPERS ---
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.add('opacity-100', 'translate-y-0');
+            t.classList.remove('opacity-0', '-translate-y-10');
+            setTimeout(() => { t.classList.add('opacity-0', '-translate-y-10'); t.classList.remove('opacity-100', 'translate-y-0'); }, 3000);
+        }
+
+        function closeDialogs() {
+            document.getElementById('dialog-overlay').classList.replace('flex', 'hidden');
+            document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
+        }
+
     </script>
 </body>
 </html>
