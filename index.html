@@ -44,7 +44,7 @@
 
     <!-- Login Overlay -->
     <div id="login-overlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-300">
             <div class="bg-[#2b579a] p-8 text-white text-center">
                 <i class="fas fa-desktop text-5xl mb-4 text-blue-200"></i>
                 <h1 class="text-2xl font-bold">معمل المهارات الرقمية</h1>
@@ -68,6 +68,9 @@
                 <button onclick="startSimulation()" class="w-full bg-[#2b579a] hover:bg-[#1e3a8a] text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-95">
                     دخول المحاكي الذكي <i class="fas fa-play ml-2"></i>
                 </button>
+                <button onclick="openTeacherAuth()" class="w-full text-blue-600 font-bold text-sm hover:underline py-2">
+                    <i class="fas fa-lock ml-1"></i> دخول المعلمة
+                </button>
             </div>
         </div>
     </div>
@@ -81,7 +84,10 @@
                 <p class="text-[10px] text-slate-400 tracking-tight">اسم الطالبة: <span id="display-name" class="text-blue-600 font-bold"></span> | الفصل: <span id="display-class" class="font-bold"></span></p>
             </div>
         </div>
-        <button onclick="location.reload()" class="text-[10px] bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition font-bold">إنهاء الجلسة</button>
+        <div class="flex items-center gap-2">
+            <button onclick="openTeacherAuth()" id="header-teacher-btn" class="hidden text-[10px] bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition font-bold border border-blue-200">دخول المعلمة</button>
+            <button onclick="location.reload()" class="text-[10px] bg-slate-100 px-3 py-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition font-bold">إنهاء الجلسة</button>
+        </div>
     </nav>
 
     <main class="flex-1 flex flex-col lg:flex-row p-4 gap-6 overflow-hidden">
@@ -191,6 +197,32 @@
                     </div>
                 </div>
 
+                <!-- Teacher Results View -->
+                <div id="view-teacher-results" class="hidden">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold">سجل إنجازات الطالبات</h2>
+                            <button onclick="switchApp('word')" class="bg-slate-100 px-4 py-2 rounded-xl text-sm font-bold">العودة للمحاكي</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right text-sm">
+                                <thead class="bg-slate-50 border-b">
+                                    <tr>
+                                        <th class="p-4">اسم الطالبة</th>
+                                        <th class="p-4 text-center">الفصل</th>
+                                        <th class="p-4 text-center">الإنجاز</th>
+                                        <th class="p-4 text-center">آخر تحديث</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teacher-table-body">
+                                    <!-- Data injected via Firestore listener -->
+                                </tbody>
+                            </table>
+                            <div id="no-data-msg" class="p-10 text-center text-slate-400 italic">لا توجد بيانات مسجلة حالياً</div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </main>
@@ -226,7 +258,7 @@
                 <div id="tab-v-input" class="hidden space-y-4">
                     <p class="text-[10px] text-slate-400">هذه الرسالة تظهر للطالبة بمجرد الوقوف على الخلية.</p>
                     <input type="text" id="v-in-title" placeholder="عنوان التوجيه" class="w-full p-2 border rounded-lg text-sm">
-                    <textarea id="v-in-body" placeholder="اكتبي تعليمات الإدخال هنا..." class="w-full p-2 border rounded-lg text-sm h-20"></textarea>
+                    <textarea id="v-in-body" placeholder="اكتبي تعليمات الإدخل هنا..." class="w-full p-2 border rounded-lg text-sm h-20"></textarea>
                 </div>
 
                 <!-- Tab: Error Alert -->
@@ -242,6 +274,14 @@
                 </div>
             </div>
         </div>
+
+        <!-- Teacher Login Dialog -->
+        <div id="dlg-teacher" class="bg-white rounded-3xl p-10 w-full max-w-sm hidden text-center shadow-2xl animate-in zoom-in duration-200">
+            <h3 class="font-bold text-xl mb-6">دخول المعلمة</h3>
+            <input type="password" id="teacher-pass" placeholder="كلمة المرور..." class="w-full p-4 border rounded-2xl text-center mb-6 focus:ring-2 ring-blue-500 outline-none">
+            <button onclick="handleTeacherLogin()" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-[#1a3a6b] transition">دخول</button>
+            <p id="teacher-err" class="text-red-500 text-xs mt-3 hidden font-bold">خطأ في كلمة المرور!</p>
+        </div>
     </div>
 
     <!-- Toast Notification -->
@@ -249,15 +289,52 @@
         <span id="toast-msg"></span>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // --- Firebase Init ---
+        let firebaseConfig = {};
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        } catch (e) { console.warn("Firebase config missing."); }
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'advanced-sim-final-v1';
+        let app, auth, db, isFirebaseInit = false;
+
+        if (firebaseConfig && firebaseConfig.apiKey) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            isFirebaseInit = true;
+        }
+
         // --- System State ---
         let student = { name: "", class: "", skills: {} };
         let currentApp = 'word';
         let selectedRows = new Set();
         let validationRules = {}; 
+        let user = null;
+        let isAuthReady = false;
 
-        // --- Core Entry Logic ---
-        function startSimulation() {
+        async function init() {
+            if (!isFirebaseInit) { isAuthReady = true; return; }
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+                else await signInAnonymously(auth);
+            } catch (e) { isAuthReady = true; }
+        }
+
+        if (isFirebaseInit) { 
+            onAuthStateChanged(auth, u => { 
+                user = u; 
+                isAuthReady = true; 
+            }); 
+        }
+
+        // --- Global Functions for UI ---
+        window.startSimulation = async () => {
             const nameInput = document.getElementById('st-name').value.trim();
             if (nameInput.length < 5) {
                 showToast("يرجى إدخال اسمكِ بشكل صحيح.");
@@ -269,13 +346,25 @@
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('display-name').innerText = student.name;
             document.getElementById('display-class').innerText = student.class;
+            document.getElementById('header-teacher-btn').classList.remove('hidden');
             
             initExcelGrid();
-            switchApp('word');
-        }
+            window.switchApp('word');
+            await saveProgress();
+        };
 
-        // --- Navigation ---
-        function switchApp(app) {
+        window.saveProgress = async () => {
+            updateGlobalProg();
+            if (!isFirebaseInit || !user) return;
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'students', user.uid), {
+                    ...student,
+                    timestamp: serverTimestamp()
+                }, { merge: true });
+            } catch (e) { console.error(e); }
+        };
+
+        window.switchApp = (app) => {
             currentApp = app;
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.add('opacity-50');
@@ -289,7 +378,7 @@
 
             renderRibbon(app);
             updateAssistant(app);
-        }
+        };
 
         const appDetails = {
             word: {
@@ -342,29 +431,29 @@
             }
         };
 
-        function renderRibbon(app) { document.getElementById('ribbon').innerHTML = appDetails[app].ribbon; }
+        window.renderRibbon = (app) => { document.getElementById('ribbon').innerHTML = appDetails[app].ribbon; };
 
-        function updateAssistant(app) {
+        window.updateAssistant = (app) => {
             document.getElementById('benefit-text').innerText = appDetails[app].benefit;
             document.getElementById('steps-list').innerHTML = appDetails[app].steps.map(s => `
                 <div class="flex items-center gap-2 p-2 rounded-xl border border-slate-100 ${student.skills[s.id] ? 'bg-green-50 opacity-60' : 'bg-slate-50'}">
                     <i class="fas ${student.skills[s.id] ? 'fa-check-circle text-green-500' : 'fa-circle text-slate-300'}"></i>
-                    <span class="${student.skills[s.id] ? 'line-through' : ''}">${s.text}</span>
+                    <span class="${student.skills[s.id] ? 'line-through text-slate-400' : ''}">${s.text}</span>
                 </div>
             `).join('');
             updateGlobalProg();
-        }
+        };
 
-        function updateGlobalProg() {
+        window.updateGlobalProg = () => {
             const total = 12; 
             const done = Object.values(student.skills).filter(v => v === true).length;
             const perc = Math.round((done / total) * 100);
             document.getElementById('perc-text').innerText = perc + "%";
             document.getElementById('perc-bar').style.width = perc + "%";
-        }
+        };
 
-        // --- WORD ---
-        function doWStyle() {
+        // --- WORD FUNCTIONS ---
+        window.doWStyle = () => {
             const sel = window.getSelection();
             if (sel.rangeCount && sel.toString().length > 2) {
                 document.execCommand('formatBlock', false, 'H2');
@@ -373,44 +462,49 @@
                 el.style.borderRight = "6px solid #2563eb";
                 el.style.paddingRight = "15px";
                 student.skills.w1 = true;
-                showToast("تم تطبيق نمط العنوان.");
+                showToast("تم تطبيق النمط!");
+                saveProgress();
                 updateAssistant('word');
             } else { showToast("ظللي أحد العناوين أولاً."); }
-        }
+        };
 
-        function doWList() {
+        window.doWList = () => {
             document.getElementById('w-list-placeholder').innerHTML = `<ol class="list-decimal space-y-2 font-bold mt-4"><li>المجتمع الحيوي<ul class="list-disc mr-6 mt-1 text-slate-600 font-normal"><li>تعزيز القيم الإسلامية</li><li>تمكين حياة صحية</li></ul></li></ol>`;
             student.skills.w2 = true;
+            saveProgress();
             updateAssistant('word');
-        }
+        };
 
-        function doWImport() {
+        window.doWImport = () => {
             showToast("جاري الاستيراد...");
             setTimeout(() => {
                 document.getElementById('w-import-placeholder').classList.remove('hidden');
                 student.skills.w3 = true;
+                saveProgress();
                 updateAssistant('word');
             }, 800);
-        }
+        };
 
-        function doWToc() {
+        window.doWToc = () => {
             if (!student.skills.w1) return showToast("يجب تطبيق الأنماط أولاً!");
             document.getElementById('toc-area').classList.remove('hidden');
             document.getElementById('toc-list').innerHTML = `<div class="flex justify-between border-b border-dotted py-2"><span>رؤية المملكة 2030</span><span>صفحة 1</span></div>`;
             student.skills.w4 = true;
+            saveProgress();
             updateAssistant('word');
-        }
+        };
 
-        function doWTrans() {
+        window.doWTrans = () => {
             showToast("جاري الترجمة...");
             setTimeout(() => {
-                document.getElementById('word-doc').innerHTML = `<h1 class='text-3xl font-bold mb-4'>Saudi Vision 2030</h1><p>Strategic framework to reduce oil dependence.</p>`;
+                document.getElementById('word-doc').innerHTML = `<h1 class='text-3xl font-bold mb-4'>Saudi Vision 2030</h1><p>Strategic framework for public service sector development.</p>`;
             }, 1000);
-        }
+        };
 
-        // --- EXCEL ---
-        function initExcelGrid() {
+        // --- EXCEL FUNCTIONS ---
+        window.initExcelGrid = () => {
             const grid = document.getElementById('excel-grid');
+            if (!grid) return;
             grid.innerHTML = `<div class='excel-cell bg-slate-100 font-bold justify-center'>#</div>` + ['A','B','C','D','E'].map(l => `<div class='excel-cell bg-slate-100 font-bold justify-center'>${l}</div>`).join('');
             for (let i = 1; i <= 10; i++) {
                 grid.innerHTML += `<div class='excel-cell bg-slate-50 font-bold cursor-pointer justify-center hover:bg-blue-100' onclick='selXlRow(${i})'>${i}</div>`;
@@ -421,9 +515,9 @@
             document.getElementById('xc-1-0').innerText = "المنطقة";
             document.getElementById('xc-1-1').innerText = "التقدير";
             document.getElementById('xc-2-0').innerText = "الرياض";
-        }
+        };
 
-        function selXlRow(r) {
+        window.selXlRow = (r) => {
             const cells = document.querySelectorAll(`[id^="xc-${r}-"]`);
             if (selectedRows.has(r)) {
                 selectedRows.delete(r);
@@ -433,24 +527,24 @@
                 cells.forEach(c => c.classList.add('selected-row'));
             }
             document.getElementById('xl-sel-count').innerText = `محدد: ${selectedRows.size} صفوف`;
-        }
+        };
 
-        function openXlValDialog() {
-            if (selectedRows.size === 0) return showToast("حددي صَفاً أولاً بالضغط على رقمه.");
+        window.openXlValDialog = () => {
+            if (selectedRows.size === 0) return showToast("حددي صَفاً أولاً.");
             document.getElementById('dialog-overlay').classList.replace('hidden', 'flex');
             document.getElementById('dlg-validation').classList.remove('hidden');
-        }
+        };
 
-        function switchDlgTab(tab) {
+        window.toggleVSource = (v) => { document.getElementById('v-source-box').classList.toggle('hidden', v !== 'list'); };
+
+        window.switchDlgTab = (tab) => {
             document.querySelectorAll('.dialog-tab').forEach(t => t.classList.remove('active'));
             document.getElementById(`dt-${tab}`).classList.add('active');
             document.querySelectorAll('[id^="tab-v-"]').forEach(v => v.classList.add('hidden'));
             document.getElementById(`tab-v-${tab}`).classList.remove('hidden');
-        }
+        };
 
-        function toggleVSource(v) { document.getElementById('v-source-box').classList.toggle('hidden', v !== 'list'); }
-
-        function applyValidation() {
+        window.applyValidation = () => {
             const src = document.getElementById('v-source').value;
             selectedRows.forEach(row => {
                 const target = document.getElementById(`xc-${row}-1`);
@@ -458,10 +552,13 @@
                 validationRules[`${row}-1`] = { title: document.getElementById('v-in-title').value, body: document.getElementById('v-in-body').value };
             });
             student.skills.e1 = student.skills.e2 = student.skills.e3 = student.skills.e4 = true;
-            closeDialogs(); updateAssistant('excel'); showToast("تم تطبيق قاعدة التحقق!");
-        }
+            closeDialogs();
+            saveProgress();
+            updateAssistant('excel');
+            showToast("تم تطبيق قاعدة التحقق!");
+        };
 
-        function xlOnFocus(r, c) {
+        window.xlOnFocus = (r, c) => {
             const rule = validationRules[`${r}-${c}`];
             if (rule && rule.body) {
                 const box = document.getElementById('input-msg-box');
@@ -472,30 +569,31 @@
                 box.innerHTML = `<div class='font-bold'>${rule.title}</div>${rule.body}`;
                 box.classList.remove('hidden');
             }
-        }
-        function xlOnBlur() { document.getElementById('input-msg-box').classList.add('hidden'); }
+        };
 
-        function doXlFreeze() {
+        window.xlOnBlur = () => { document.getElementById('input-msg-box').classList.add('hidden'); };
+
+        window.doXlFreeze = () => {
             document.querySelectorAll('.excel-cell').forEach(c => { if(c.innerText === "المنطقة" || c.innerText === "التقدير") c.style.background = "#dcfce7"; });
             showToast("تم تجميد الصف العلوي.");
-        }
+        };
 
-        function doXlProtect() { showToast("تم تأمين الورقة."); }
-        function doXlLink() { showToast("تم ربط البيانات."); }
+        window.doXlProtect = () => { showToast("تم تأمين الورقة."); };
+        window.doXlLink = () => { showToast("تم ربط البيانات."); };
 
         // --- PPT ---
-        function checkPptInput() {
+        window.checkPptInput = () => {
             const title = document.getElementById('ppt-title').innerText;
-            const body = document.getElementById('ppt-body').innerText;
-            if (title.length > 5 || body.length > 5) {
+            if (title.length > 5 && title !== "انقري هنا واكتبي اسم المشروع") {
                 if (!student.skills.p2) {
                     student.skills.p2 = true;
+                    saveProgress();
                     updateAssistant('ppt');
                 }
             }
-        }
+        };
 
-        function toggleMasterMode() {
+        window.toggleMasterMode = () => {
             const badge = document.getElementById('master-badge');
             const slide = document.getElementById('ppt-slide');
             const isActive = badge.classList.toggle('hidden');
@@ -503,41 +601,83 @@
                 slide.classList.add('ring-4', 'ring-amber-400');
                 showToast("أنتِ الآن في وضع الشريحة الرئيسية.");
                 student.skills.p1 = true;
+                saveProgress();
                 updateAssistant('ppt');
             } else {
                 slide.classList.remove('ring-4', 'ring-amber-400');
             }
-        }
+        };
 
-        function applyPPTTheme(theme) {
+        window.applyPPTTheme = (theme) => {
             const slide = document.getElementById('ppt-slide');
             slide.classList.remove('theme-default', 'theme-neom', 'theme-vision');
             slide.classList.add(theme === 'neom' ? 'theme-neom' : 'theme-vision');
-            showToast("تم تطبيق التنسيق على كامل العرض.");
+            showToast("تم تطبيق التنسيق.");
             student.skills.p3 = true;
+            saveProgress();
             updateAssistant('ppt');
-        }
+        };
 
-        function doPExport() {
+        window.doPExport = () => {
             showToast("جاري التصدير...");
             student.skills.p4 = true;
+            saveProgress();
             updateAssistant('ppt');
+        };
+
+        // --- TEACHER LOGIC ---
+        window.openTeacherAuth = () => {
+            document.getElementById('dialog-overlay').classList.replace('hidden', 'flex');
+            document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
+            document.getElementById('dlg-teacher').classList.remove('hidden');
+        };
+
+        window.handleTeacherLogin = () => {
+            const pass = document.getElementById('teacher-pass').value;
+            if (pass === "abeer2026") {
+                closeDialogs();
+                loadTeacherDashboard();
+            } else {
+                document.getElementById('teacher-err').classList.remove('hidden');
+            }
+        };
+
+        function loadTeacherDashboard() {
+            document.getElementById('view-word').classList.add('hidden');
+            document.getElementById('view-excel').classList.add('hidden');
+            document.getElementById('view-ppt').classList.add('hidden');
+            document.getElementById('view-teacher-results').classList.remove('hidden');
+
+            if (!isFirebaseInit) return;
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => {
+                const tbody = document.getElementById('teacher-table-body');
+                tbody.innerHTML = '';
+                document.getElementById('no-data-msg').classList.toggle('hidden', !snap.empty);
+                snap.forEach(d => {
+                    const data = d.data();
+                    const done = Object.values(data.skills || {}).filter(v => v === true).length;
+                    const perc = Math.round((done / totalSkills) * 100);
+                    tbody.innerHTML += `<tr class="border-b hover:bg-slate-50 transition"><td class="p-4 font-bold text-slate-800">${data.name}</td><td class="p-4 text-center font-bold text-blue-600">${data.class}</td><td class="p-4 text-center"><div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-green-500 h-full rounded-full" style="width: ${perc}%"></div></div><span class="text-[10px] font-bold">${perc}%</span></td><td class="p-4 text-[10px] text-slate-400">${data.timestamp?.toDate().toLocaleString('ar-SA') || '--'}</td></tr>`;
+                });
+            });
         }
 
         // --- HELPERS ---
-        function showToast(msg) {
+        window.closeDialogs = () => {
+            document.getElementById('dialog-overlay').classList.replace('flex', 'hidden');
+            document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
+        };
+
+        window.showToast = (msg) => {
             const t = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
+            const msgEl = document.getElementById('toast-msg');
+            msgEl.innerText = msg;
             t.classList.add('opacity-100', 'translate-y-0');
             t.classList.remove('opacity-0', '-translate-y-10');
             setTimeout(() => { t.classList.add('opacity-0', '-translate-y-10'); t.classList.remove('opacity-100', 'translate-y-0'); }, 3000);
-        }
+        };
 
-        function closeDialogs() {
-            document.getElementById('dialog-overlay').classList.replace('flex', 'hidden');
-            document.querySelectorAll('[id^="dlg-"]').forEach(d => d.classList.add('hidden'));
-        }
-
+        init();
     </script>
 </body>
 </html>
