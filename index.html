@@ -64,7 +64,7 @@
                 
                 <div class="pt-2 text-center">
                     <button onclick="openTeacherAuth()" class="text-blue-600 font-bold text-sm hover:underline">
-                        <i class="fas fa-list-ol ml-1"></i> عرض قائمة إنجازات الطالبات
+                        <i class="fas fa-list-ol ml-1 text-xs"></i> عرض قائمة إنجازات الطالبات والـ 15 المسجلات
                     </button>
                 </div>
             </div>
@@ -146,20 +146,20 @@
                                     <div class="flex items-center gap-3">
                                         <i class="fas fa-award text-amber-500 text-3xl"></i>
                                         <h2 class="text-2xl font-bold">سجل إنجاز الطالبات المبدعات</h2>
-                                        <span id="student-counter-public" class="bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold">0 طالبة</span>
+                                        <span id="student-counter-public" class="bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold">0 طالبة مسجلة</span>
                                     </div>
-                                    <p class="text-xs text-slate-500 mt-2 font-bold tracking-tight">هذه القائمة محدثة لحظياً وتظهر أسماء الطالبات اللاتي أنجزن مهارات الوحدة الثالثة.</p>
+                                    <p class="text-xs text-slate-500 mt-2 font-bold tracking-tight">هذه القائمة محدثة لحظياً وتظهر جميع الطالبات اللاتي دخلن الرابط وتقدمن في المهارات.</p>
                                 </div>
                                 <div class="flex gap-2">
                                     <button onclick="exportToExcel()" id="export-excel-btn" class="hidden bg-green-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg flex items-center gap-2 hover:bg-green-700 transition">
-                                        <i class="fas fa-file-excel"></i> تحميل سجل (Excel)
+                                        <i class="fas fa-file-excel text-xs"></i> تحميل سجل (Excel)
                                     </button>
                                     <button onclick="switchApp('word')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition">العودة للتدريب</button>
                                 </div>
                             </div>
                             
                             <div id="public-honor-roll" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                                <!-- Student cards will appear here -->
+                                <!-- Cards appear here -->
                             </div>
                             
                             <div id="no-data-public" class="p-20 text-center text-slate-400 italic font-bold">لا توجد بيانات حالياً.</div>
@@ -173,14 +173,13 @@
 
     <!-- Modals -->
     <div id="dialog-overlay" class="fixed inset-0 bg-black/60 z-[3000] hidden items-center justify-center p-4 backdrop-blur-sm">
-        <!-- Excel Validation -->
         <div id="dlg-validation" class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden hidden"><div class="bg-slate-100 p-3 flex text-[10px] font-bold border-b gap-4"><button onclick="switchDlgTab('settings')" id="dt-settings" class="dialog-tab active px-3 pb-1">الإعدادات</button></div><div class="p-6"><label class="block text-xs font-bold text-slate-500 mb-1">السماح بـ:</label><select id="v-type" class="w-full p-2 border rounded-lg text-sm" onchange="toggleVSource(this.value)"><option value="any">أي قيمة</option><option value="list">قائمة</option></select><div id="v-source-box" class="hidden mt-2"><input type="text" id="v-source" placeholder="ممتاز, جيد, مقبول" class="w-full p-2 border rounded-lg text-sm"></div><div class="mt-8 flex justify-end gap-2"><button onclick="closeDialogs()" class="px-4 py-2 text-sm text-slate-400">إلغاء</button><button onclick="applyValidation()" class="bg-green-600 text-white px-8 py-2 rounded-xl font-bold">موافق</button></div></div></div>
 
         <!-- Teacher Login Modal -->
         <div id="dlg-teacher" class="bg-white rounded-3xl p-10 w-full max-w-sm hidden text-center shadow-2xl animate-in zoom-in duration-200">
             <h3 class="font-bold text-xl mb-6 text-slate-800">التحقق من هوية المعلمة</h3>
             <input type="password" id="teacher-pass" placeholder="أدخلي كلمة المرور..." class="w-full p-4 border rounded-2xl text-center mb-6 focus:ring-2 ring-blue-500 outline-none">
-            <button onclick="handleTeacherLogin()" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-[#1a3a6b] transition">عرض القائمة</button>
+            <button onclick="handleTeacherLogin()" class="w-full bg-[#2b579a] text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-[#1a3a6b] transition">عرض سجل الطالبات</button>
             <p id="teacher-err" class="text-red-500 text-xs mt-3 hidden font-bold">كلمة المرور غير صحيحة!</p>
         </div>
     </div>
@@ -193,10 +192,12 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // --- Config ---
+        // --- Firebase Handling ---
         let firebaseConfig = {};
         try { firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {}; } catch (e) {}
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'office-sim-honor-roll-v2';
+        
+        // This appId ensures the data is stored in the correct place for the 15 students
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'office-sim-honor-roll-v3';
         let app, auth, db, isFirebaseInit = false;
 
         if (firebaseConfig && firebaseConfig.apiKey) {
@@ -206,8 +207,8 @@
         let student = { name: "", class: "", skills: {} };
         let currentApp = 'word';
         let selectedRows = new Set();
-        let validationRules = {};
         let user = null, isAuthReady = false;
+        let studentsList = []; // For export
 
         async function initAuth() {
             if (!isFirebaseInit) { isAuthReady = true; return; }
@@ -249,9 +250,7 @@
         window.switchApp = (app) => {
             currentApp = app;
             document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
-            const targetView = document.getElementById(`view-${app}`);
-            if (targetView) targetView.classList.remove('hidden');
-
+            document.getElementById(`view-${app}`).classList.remove('hidden');
             document.querySelectorAll('.tab-btn').forEach(b => { b.classList.add('opacity-50'); b.classList.remove('active'); });
             const tabBtn = document.getElementById(`tab-${app}`);
             if (tabBtn) { tabBtn.classList.remove('opacity-50'); tabBtn.classList.add('active'); }
@@ -260,7 +259,7 @@
             const ribbon = document.getElementById('ribbon');
             if (app === 'achievements') {
                 if(sidebar) sidebar.classList.add('hidden');
-                if(ribbon) ribbon.innerHTML = `<div class='text-xs font-bold text-slate-400 mr-4'><i class='fas fa-medal ml-1'></i> تظهر هذه اللوحة إنجازات الطالبات اللاتي استخدمن المحاكي.</div>`;
+                if(ribbon) ribbon.innerHTML = `<div class='text-xs font-bold text-slate-400 mr-4'><i class='fas fa-medal ml-1'></i> تظهر هذه اللوحة إنجازات جميع الطالبات المسجلات.</div>`;
             } else {
                 if(sidebar) sidebar.classList.remove('hidden');
                 renderRibbon(app); updateAssistant(app);
@@ -307,7 +306,6 @@
         };
 
         // --- PUBLIC RECORDS LISTENER ---
-        let studentsList = [];
         function listenToPublicRecords() {
             if (!isFirebaseInit) return;
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'students'), (snap) => {
@@ -326,13 +324,13 @@
                     const perc = Math.round((doneCount / 11) * 100);
                     
                     const card = document.createElement('div');
-                    card.className = "leaderboard-card bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between";
+                    card.className = "leaderboard-card bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between animate-in fade-in zoom-in duration-300";
                     card.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold">${data.name[0]}</div>
                             <div>
                                 <h4 class="font-bold text-xs text-slate-800">${data.name}</h4>
-                                <p class="text-[10px] text-slate-400">${data.class || '---'}</p>
+                                <p class="text-[10px] text-slate-400 font-bold">${data.class || '---'}</p>
                             </div>
                         </div>
                         <div class="text-left">
@@ -348,34 +346,31 @@
 
         // --- ACTIONS ---
         window.doWStyle = () => { const sel = window.getSelection(); if (sel.rangeCount && sel.toString().length > 2) { document.execCommand('formatBlock', false, 'H2'); const el = sel.getRangeAt(0).commonAncestorContainer.parentElement; el.style.color = "#1e3a8a"; el.style.borderRight = "6px solid #2563eb"; el.style.paddingRight = "15px"; student.skills.w1 = true; saveProgress(); updateAssistant('word'); showToast("نمط العنوان نشط."); } else showToast("ظللي نصاً أولاً."); };
-        window.doWList = () => { document.getElementById('w-list-placeholder').innerHTML = `<ol class="list-decimal space-y-2 font-bold mt-4"><li>المجتمع الحيوي<ul class="list-disc mr-6 mt-1 text-slate-600 font-normal"><li>تعزيز القيم</li><li>تمكين حياة صحية</li></ul></li></ol>`; student.skills.w2 = true; saveProgress(); updateAssistant('word'); };
+        window.doWList = () => { document.getElementById('w-list-placeholder').innerHTML = `<ol class="list-decimal space-y-2 font-bold mt-4"><li>المجتمع الحيوي<ul class="list-disc mr-6 mt-1 text-slate-600 font-normal"><li>تعزيز القيم الإسلامية</li><li>تمكين حياة صحية</li></ul></li></ol>`; student.skills.w2 = true; saveProgress(); updateAssistant('word'); };
         window.doWImport = () => { showToast("جاري الاستيراد..."); setTimeout(() => { document.getElementById('w-import-placeholder').classList.remove('hidden'); student.skills.w3 = true; saveProgress(); updateAssistant('word'); }, 800); };
-        window.doWToc = () => { if (!student.skills.w1) return showToast("طبقي الأنماط أولاً!"); document.getElementById('toc-area').classList.remove('hidden'); document.getElementById('toc-list').innerHTML = `<div class="flex justify-between border-b border-dotted py-2"><span>رؤية المملكة 2030</span><span>صفحة 1</span></div>`; student.skills.w4 = true; saveProgress(); updateAssistant('word'); };
+        window.doWToc = () => { if (!student.skills.w1) return showToast("يجب تطبيق الأنماط أولاً!"); document.getElementById('toc-area').classList.remove('hidden'); document.getElementById('toc-list').innerHTML = `<div class="flex justify-between border-b border-dotted py-2"><span>رؤية المملكة 2030</span><span>صفحة 1</span></div>`; student.skills.w4 = true; saveProgress(); updateAssistant('word'); };
         
         window.initExcelGrid = () => {
             const grid = document.getElementById('excel-grid'); if (!grid) return;
             grid.innerHTML = `<div class='excel-cell bg-slate-100 font-bold justify-center'>#</div>` + ['A','B','C','D','E'].map(l => `<div class='excel-cell bg-slate-100 font-bold justify-center'>${l}</div>`).join('');
             for (let i = 1; i <= 8; i++) {
                 grid.innerHTML += `<div class='excel-cell bg-slate-50 font-bold cursor-pointer justify-center hover:bg-blue-100' onclick='selXlRow(${i})'>${i}</div>`;
-                for (let j = 0; j < 5; j++) grid.innerHTML += `<div contenteditable='true' class='excel-cell' id='xc-${i}-${j}' onfocus='xlFocus(${i},${j})' onblur='xlBlur()' oninput='saveProgress()'></div>`;
+                for (let j = 0; j < 5; j++) grid.innerHTML += `<div contenteditable='true' class='excel-cell' id='xc-${i}-${j}' oninput='saveProgress()'></div>`;
             }
             document.getElementById('xc-1-0').innerText = "المنطقة"; document.getElementById('xc-1-1').innerText = "التقدير";
         };
         window.selXlRow = (r) => { const cells = document.querySelectorAll(`[id^="xc-${r}-"]`); if (selectedRows.has(r)) { selectedRows.delete(r); cells.forEach(c => c.classList.remove('selected-row')); } else { selectedRows.add(r); cells.forEach(c => c.classList.add('selected-row')); } document.getElementById('xl-sel-count').innerText = `محدد: ${selectedRows.size} صفوف`; };
         window.openXlValDialog = () => { if (selectedRows.size === 0) return showToast("حددي صَفاً أولاً."); document.getElementById('dialog-overlay').classList.replace('hidden', 'flex'); document.getElementById('dlg-validation').classList.remove('hidden'); };
-        window.toggleVSource = (v) => { document.getElementById('v-source-box').classList.toggle('hidden', v !== 'list'); };
         window.applyValidation = () => {
             const src = document.getElementById('v-source').value;
             selectedRows.forEach(row => {
                 const target = document.getElementById(`xc-${row}-1`);
                 if (src.length > 2) target.innerHTML = `<select class='w-full bg-transparent outline-none' onchange='saveProgress()'>${src.split(',').map(s => `<option>${s.trim()}</option>`).join('')}</select>`;
-                validationRules[`${row}-1`] = { title: "توجيه", body: "اختر من القائمة" };
             });
-            student.skills.e1 = student.skills.e2 = student.skills.e3 = student.skills.e4 = true;
+            student.skills.e1 = student.skills.e2 = true;
             closeDialogs(); saveProgress(); updateAssistant('excel'); showToast("تم تطبيق قاعدة التحقق!");
         };
-        window.xlFocus = (r, c) => { const rule = validationRules[`${r}-${c}`]; if (rule && rule.body) { const box = document.getElementById('input-msg-box'); const cell = document.getElementById(`xc-${r}-${c}`); const rect = cell.getBoundingClientRect(); box.style.left = (rect.right + 10) + "px"; box.style.top = (rect.top + window.scrollY) + "px"; box.innerHTML = `<div class='font-bold text-blue-800 border-b mb-1'>${rule.title}</div>${rule.body}`; box.classList.remove('hidden'); } };
-        window.xlBlur = () => { document.getElementById('input-msg-box').classList.add('hidden'); };
+        window.doXlFreeze = () => { showToast("تم تجميد الصف العلوي."); };
 
         window.checkPptInput = () => { const title = document.getElementById('ppt-title').innerText; if (title.length > 5 && title !== "أدخلي عنوان العرض هنا") { if (!student.skills.p2) { student.skills.p2 = true; saveProgress(); updateAssistant('ppt'); } } saveProgress(); };
         window.toggleMasterMode = () => { const badge = document.getElementById('master-badge'); const isActive = badge.classList.toggle('hidden'); if (!isActive) { showToast("وضع الشريحة الرئيسية نَشِط."); student.skills.p1 = true; saveProgress(); updateAssistant('ppt'); } };
